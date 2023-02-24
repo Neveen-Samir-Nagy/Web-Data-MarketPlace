@@ -7,6 +7,8 @@ import excel from 'exceljs';
 var categories = [];
 var denododb;
 var ip = 'localhost';
+var password_admin = 'admin';
+
 
 export var sync_vdp_datacatalog = function () {
     return new Promise((resolve, reject) => {
@@ -32,14 +34,14 @@ export var sync_vdp_datacatalog = function () {
     })
 }
 
-export var connect_denodo = function (user = 'admin', pass = 'admin') {
+export var connect_denodo = function (user = 'admin', pass = password_admin, database = 'admin') {
     return new Promise((resolve, reject) => {
         if (!jinst.isJvmCreated()) {
             jinst.addOption("-Xrs");
             jinst.setupClasspath(['C:/Denodo/DenodoPlatform8.0/tools/client-drivers/jdbc/denodo-vdp-jdbcdriver.jar']);
         }
         var config = {
-            url: 'jdbc:denodo://'+ip+':9999/admin',
+            url: 'jdbc:denodo://'+ip+':9999/'+database,
             drivername: 'com.denodo.vdp.jdbc.Driver',
             minpoolsize: 1,
             maxpoolsize: 100,
@@ -399,7 +401,7 @@ export var get_ws_url = function (databaseName, viewName) {
     return url;
 };
 
-export var access_privilege = (databaseName, wsName, userName) => {
+export var access_privilege = (databaseName, viewName, wsName, userName) => {
     return new Promise( (resolve, reject) => {
          denododb.reserve(function (err, connObj) {
             if (connObj) {
@@ -417,6 +419,13 @@ export var access_privilege = (databaseName, wsName, userName) => {
                                         console.log(err);
                                     } else {
                                         //Execute a query
+                                        connect_denodo('admin', password_admin, databaseName);
+                                        statement.executeQuery("ALTER USER "+userName+" GRANT CONNECT ON "+databaseName+";",
+                                        
+
+                                        statement.executeQuery("ALTER USER "+userName+" GRANT METADATA,EXECUTE ON "+databaseName+"."+viewName+";",
+                                        
+
                                         statement.executeQuery("desc vql webservice "+databaseName+"."+wsName+" ('includeDependencies'='no','replaceExistingElements'='yes','dropElements'='no');",
                                         function (err, resultset) {
                                             if (err) {
@@ -429,7 +438,14 @@ export var access_privilege = (databaseName, wsName, userName) => {
                                                     }
                                                     if (results.length > 0) {
                                                         // console.log("Record count: " + results.length);
-                                                        //console.log(results);
+                                                        var first_index = results[0].result.indexOf("(BASIC VDP");
+                                                        var first_part = results[0].result.substring(0, first_index+"(BASIC VDP".length);
+                                                        var second_index = results[0].result.indexOf("RESOURCES (");
+                                                        var second_part = results[0].result.substring(second_index, results[0].result.length);
+                                                        var middle_part = results[0].result.substring(first_index+"(BASIC VDP".length, second_index);
+                                                        var users = " VDPACCEPTEDUSERS "+"'"+userName+","+middle_part.substring(middle_part.indexOf("'")+1, middle_part.length)
+                                                        results[0].result = first_part + users + second_part;
+                                                        console.log(first_part + users + second_part);
                                                         return resolve(results);
                                                     } else {
                                                         console.log(err);
@@ -438,8 +454,42 @@ export var access_privilege = (databaseName, wsName, userName) => {
                                                 );
                                             }
                                         }
+                                        )
+                                        )
+                                        
                                         );
                                         
+                                    }
+                                });
+                            }
+                        });
+                    }
+                ]);
+            }
+        })
+    })
+};
+
+export var redploy_ws = (wsName, query) => {
+    return new Promise( (resolve, reject) => {
+         denododb.reserve(function (err, connObj) {
+            if (connObj) {
+                var conn = connObj.conn;
+                // Query the database.
+                asyncjs.series([
+                     function () {
+                        // Select statement example.
+                         conn.createStatement( function (err, statement) {
+                            if (err) {
+                                console.log(err);
+                            } else {
+                                statement.setFetchSize(100,  function (err) {
+                                    if (err) {
+                                        console.log(err);
+                                    } else {
+                                        //Execute a query
+                                        statement.executeQuery(query,);
+                                        statement.executeQuery("REDEPLOY WEBSERVICE "+wsName+";",);
                                     }
                                 });
                             }
@@ -454,13 +504,6 @@ export var access_privilege = (databaseName, wsName, userName) => {
 // create_api('bv_dev_usecase_roles');
 
 export var download = (req, res, objs) => {
-    //   var objs = [{id:1, title: "title1", description: "description1", published: "published1"},
-    //   {id:2, title: "title2", description: "description2", published: "published2"},
-    //   {id:3, title: "title3", description: "description3", published: "published3"},
-    //   {id:4, title: "title4", description: "description4", published: "published4"},
-    //   {id:5, title: "title5", description: "description5", published: "published5"},
-    //   {id:6, title: "title6", description: "description6", published: "published6"},
-    //   {id:7, title: "title7", description: "description7", published: "published7"}];
     var workbook = new excel.Workbook();
     var worksheet = workbook.addWorksheet("Tutorials");
     var headers = Object.keys(objs[0]);
@@ -469,9 +512,6 @@ export var download = (req, res, objs) => {
         columns.push({ header: head, key: head});
     });
     worksheet.columns = columns;
-    // Add Array Rows
-    //worksheet.addRows(tutorials);
-    //var counter = 1;
     console.log(objs);
     worksheet.addRows(objs); // Add data in worksheet
     console.log(worksheet.getRow(2).values);
@@ -568,8 +608,6 @@ export var create_datasource = (databaseName, datasourceType = 'JDBC', datasourc
     })
 };
 
-//connect to denodo before executing any query on vdp --> impersonate
-//privilege
 export var create_remoteTable = (tableName, databaseName_source, datasourceName, databaseName_view, viewName) => {
     return new Promise( (resolve, reject) => {
          denododb.reserve(function (err, connObj) {
@@ -588,28 +626,10 @@ export var create_remoteTable = (tableName, databaseName_source, datasourceName,
                                         console.log(err);
                                     } else {
                                         //Execute a query
-                                        statement.executeQuery("CREATE REMOTE TABLE "+tableName+" INTO "+databaseName_source+"." +datasourceName+" AS SELECT * FROM "+databaseName_view+"."+viewName+";",
-                                        );
+                                        connect_denodo('admin', password_admin, 'admin')
+                                        statement.executeQuery("CREATE REMOTE TABLE "+tableName+" INTO "+databaseName_source+"." +datasourceName+" AS SELECT * FROM "+databaseName_view+"."+viewName+";",);
 
                                         statement.executeQuery("DROP DATASOURCE JDBC IF EXISTS "+datasourceName+";",
-                                        function (err, resultset) {
-                                            if (err) {
-                                                console.log(err);
-                                            } else {
-                                                resultset.toObjArray(function (err, results) {
-                                                    //Printing number of records
-                                                    if (typeof results === 'undefined') {
-                                                        return resolve([]);
-                                                    }
-                                                    if (results.length > 0) {
-                                                        return resolve('DONE');
-                                                    } else {
-                                                        console.log(err);
-                                                    }
-                                                }
-                                                );
-                                            }
-                                        }
                                         );
                                         
                                     }

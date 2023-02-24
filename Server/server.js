@@ -1,4 +1,4 @@
-import { sync_vdp_datacatalog, connect_denodo, create_api, databases, get_ws_url, ws_details, sample_data, views, view_columns, view_details, catalog_permissions, download, webcontainer_services, webservices, create_datasource, create_remoteTable, access_privilege } from './index.js';
+import { sync_vdp_datacatalog, connect_denodo, create_api, databases, get_ws_url, ws_details, sample_data, views, view_columns, view_details, catalog_permissions, download, webcontainer_services, webservices, create_datasource, create_remoteTable, access_privilege, redploy_ws } from './index.js';
 import express from 'express';
 import cors from 'cors';
 import http from 'http';
@@ -18,8 +18,8 @@ server.listen(port, () => {
     console.log(`App listening on port ${port}`)
 });
 
-app.get('/connect-denodo/:user/:pass', (req, res) => {
-    var flag = connect_denodo(String(req.params.user + ''), String(req.params.pass + '')).then(function (results) {
+app.get('/connect-denodo/:user/:pass/:database', (req, res) => {
+    var flag = connect_denodo(String(req.params.user), String(req.params.pass), String(req.params.database )).then(function (results) {
         console.log(results);
         res.send(results);
 
@@ -139,9 +139,10 @@ app.get('/create-remoteTable/:remoteTableName/:database_source/:data_source/:dat
     });
 });
 
-app.get('/access-privilege/:databaseName/:wsName/:userName', (req, res) => {
-    const database = access_privilege(String(req.params.databaseName), String(req.params.wsName), String(req.params.userName)).then(function (results) {
-        res.send(results);
+app.get('/access-privilege/:databaseName/:viewName/:wsName/:userName', (req, res) => {
+    const database = access_privilege(String(req.params.databaseName),String(req.params.viewName), String(req.params.wsName), String(req.params.userName)).then(function (results) {
+        redploy_ws(String(req.params.wsName), results[0].result);
+        res.send('Done');
     });
 });
 
