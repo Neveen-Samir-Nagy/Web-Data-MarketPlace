@@ -1,0 +1,32 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+#==============================================
+#denodo-ejada-catalog
+#---------------------------------
+# dependencies
+/denodo-ejada-catalog/node_modules
+/denodo-ejada-catalog/.pnp
+/denodo-ejada-catalog/.pnp.js
+#---------------------------------
+# testing
+/denodo-ejada-catalog/coverage
+#---------------------------------
+# production
+/denodo-ejada-catalog/build
+#---------------------------------
+# misc
+/denodo-ejada-catalog/.DS_Store
+/denodo-ejada-catalog/.env.local
+/denodo-ejada-catalog/.env.development.local
+/denodo-ejada-catalog/.env.test.local
+/denodo-ejada-catalog/.env.production.local
+
+/denodo-ejada-catalog/npm-debug.log*
+/denodo-ejada-catalog/yarn-debug.log*
+/denodo-ejada-catalog/yarn-error.log*
+
+#=========================================
+# server
+/server/node_modules
+
+/upload
