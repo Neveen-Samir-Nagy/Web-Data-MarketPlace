@@ -319,11 +319,11 @@ export var webservices = (user) => {
                         //     element.schema = results.schema;
                         //     element.url = results.connectionUris['web-service-connection-url'];
                             if (results2.find(ws => ws['username'] === 'admin') !== undefined) {
-                                element.subscribe = true;
+                                element.subscripe = true;
                             } else if (results2.find(ws => ws['dbname'] === element['database_name'] && ws['elementname'] === element['service_name']) === undefined) {
-                                element.subscribe = false;
+                                element.subscripe = false;
                             } else {
-                                element.subscribe = true;
+                                element.subscripe = true;
                             }
                             //Don't touch this comment or there will be no return (bossey htz3al)
                             // if(count === results1.length){

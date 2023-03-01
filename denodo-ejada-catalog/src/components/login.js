@@ -11,14 +11,14 @@ function LOGIN() {
     e.preventDefault();
     axios
       .get(
-        "http://localhost:3000/connect-denodo/" + username + "/" + password + ""
+        "http://localhost:3000/connect-denodo/" + username + "/" + password + "/admin"
       )
       .then((response) => {
         localStorage.setItem("login", response.data);
         if (response.data) {
           axios
             .get(
-              "http://localhost:3000/connect-denodo/admin/admin"
+              "http://localhost:3000/connect-denodo/admin/admin/admin"
             )
         }
         setfailed(false);

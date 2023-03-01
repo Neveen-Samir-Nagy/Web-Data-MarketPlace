@@ -96,7 +96,7 @@ function New() {
             justifyContent: "flex-start",
           }}
         >
-          {wsNew.map((item, key) => (!item.subscribe ?
+          {wsNew.map((item, key) => (!item.subscripe ?
           <Box>
             <Card
               sx={{

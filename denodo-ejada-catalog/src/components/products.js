@@ -27,27 +27,59 @@ import { Link } from "react-router-dom";
 function Products() {
   const [purchasedWs, setPurchasedWs] = useState([]);
   const [open, setOpen] = useState(false);
- 
+
   const [serviceName, setServiceName] = useState('');
 
   const [DB, setDB] = useState('');
 
+  const [viewsMetaSchema, setViewsMetaSchema] = useState([]);
+  const [viewsTags, setViewsTags] = useState([]);
+  const [viewsCategories, setViewsCategories] = useState([]);
+  const [wsType, setWsType] = useState('');
+  const [loadingData, setLoadingData] = useState(false);
+
   console.log('products');
-  useEffect(()=>{
+  useEffect(() => {
     axios
-    .get(
-      "http://localhost:3000/webcontainer_services/" + localStorage.getItem("user") + ""
-    )
-    .then((response) => {
-      setPurchasedWs(response.data);
-    })
-  },[])
-  
+      .get(
+        "http://localhost:3000/webcontainer_services/" + localStorage.getItem("user") + ""
+      )
+      .then((response) => {
+        setPurchasedWs(response.data);
+        console.log(response.data);
+      })
+  }, [])
+
   const handleClickOpen = (key) => {
     setServiceName(purchasedWs[key].service_name)
     setDB(purchasedWs[key].database_name)
     setOpen(true);
-    {console.log(serviceName)}
+    { console.log(purchasedWs[key].service_name) }
+    //setViewsMetaSchema([]);
+    var arr_schema = []
+      axios.get('http://localhost:3000/ws-details/' + purchasedWs[key].database_name + '/' + purchasedWs[key].service_name)
+          .then((res) => {
+              Object.keys(JSON.parse(res.data)["schema"]).forEach(function(key) {
+                  JSON.parse(res.data)["schema"][key].map((item) => arr_schema.push(item.name));
+                  console.log(JSON.parse(res.data)["schema"][key]);
+                });
+                setViewsMetaSchema(arr_schema);
+              //setViewsMetaSchema(JSON.parse(res.data)["schema"][0])
+              setViewsTags(
+                  JSON.parse(res.data)["tags"].map((item) => item.name)
+              );
+              console.log(viewsMetaSchema);
+
+              setViewsCategories(
+                  JSON.parse(res.data)["categories"].map((item) => item.name)
+              );
+              setWsType(JSON.parse(res.data)["wsType"]);
+              //setLoadingData(false);
+              setLoadingData(true);
+          })
+          .catch((error) => {
+              console.log(error);
+          });
 
   };
 
@@ -65,47 +97,48 @@ function Products() {
             justifyContent: "flex-start",
           }}
         >
-          {purchasedWs.map((item, key) => ( item.subscribe ?
-           <Box>
-           <Card
-              sx={{
-                width: 250,
-                maxWidth: 250,
-                marginTop: "15px",
-                marginRight: "20px",
-              }}
-            >
-              <CardHeader
-                title={item.service_name}
-                subheader={item.service_type}
-              />
-
-              <CardContent>
-                <Typography variant="body2" color="text.secondary">
-                  {item.description}
-                </Typography>
-              </CardContent>
-              <Divider />
-
-              <CardActions
-                sx={{ display: "flex", justifyContent: "end" }}
-                disableSpacing
+          {purchasedWs.map((item, key) => (item.subscripe ?
+            <Box>
+              <Card
+                sx={{
+                  width: 250,
+                  maxWidth: 250,
+                  marginTop: "15px",
+                  marginRight: "20px",
+                }}
               >
-                <IconButton  component={Link} to={'/products'}>
-                  <LaunchIcon />
-                </IconButton>
-                <IconButton>
-                <InfoIcon onClick={()=>handleClickOpen(key)} />
-                </IconButton>
-              </CardActions>
-            </Card>
-            <Metadata open={open} DB={DB} name={serviceName} setOpen={setOpen}/>
+                <CardHeader
+                  title={item.service_name}
+                  subheader={item.service_type}
+                />
+
+                <CardContent>
+                  <Typography variant="body2" color="text.secondary">
+                    {item.description}
+                  </Typography>
+                </CardContent>
+                <Divider />
+
+                <CardActions
+                  sx={{ display: "flex", justifyContent: "end" }}
+                  disableSpacing
+                >
+                  <IconButton component={Link} to={'/products'}>
+                    <LaunchIcon />
+                  </IconButton>
+                  <IconButton>
+                    <InfoIcon onClick={() => handleClickOpen(key)} />
+                  </IconButton>
+                </CardActions>
+              </Card>
+              <Metadata open={open} DB={DB} name={serviceName} setOpen={setOpen} viewsCategories={viewsCategories}
+              viewsTags={viewsTags} viewsMetaSchema={viewsMetaSchema} loadingData={loadingData} wsType={wsType}/>
             </Box>
-          : <></>))}
+            : <></>))}
         </Box>
       </Box>
     </Navbar>
-    
+
   );
 }
 export default Products;

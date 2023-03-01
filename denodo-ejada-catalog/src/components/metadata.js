@@ -47,10 +47,9 @@ function Metadata(props) {
     const [Found, setFound] = useState(true);
     var [fields, setFields] = useState(["id", "name", "age", "number"]);
     var [values, setValues] = useState([[1, "name", 25, "011"]]);
-    const [viewsMetaSchema, setViewsMetaSchema] = React.useState([]);
     const [openSampleData, setOpenSampleData] = React.useState(false);
-    const [viewsTags, setViewsTags] = useState();
-    const [viewsCategories, setViewsCategories] = useState();
+    
+
     const handleClose = () => {
         props.setOpen(false);
     };
@@ -59,37 +58,20 @@ function Metadata(props) {
         setOpenSampleData(!openSampleData);
     };
 
-    useEffect(() => {
-        axios.get('http://localhost:3000/ws-details/' + props.DB + '/' + props.name)
-            .then((res) => {
-                console.log(res);
-                setViewsMetaSchema(JSON.parse(res.data)["schema"])
-                setViewsTags(
-                    JSON.parse(res.data)["tags"].map((item) => item.name)
-                );
 
-                setViewsCategories(
-                    JSON.parse(res.data)["categories"].map((item) => item.name)
-                );
+    //       axios
+    //   .get(
+    //     "http://localhost:3000/sample-data/" + props.DB + '/' + props.name
+    //   )
+    //   .then((response) => {
+    //     setFields(response.data[0]);
+    //     setValues(response.data.slice(1, response.data.length));
+    //     setLoadingData(false);
+    //   })
+    //   .catch((error) => {
+    //     console.log(error);
+    //   });
 
-            })
-            .catch((error) => {
-                console.log(error);
-            });
-
-        //       axios
-        //   .get(
-        //     "http://localhost:3000/sample-data/" + props.DB + '/' + props.name
-        //   )
-        //   .then((response) => {
-        //     setFields(response.data[0]);
-        //     setValues(response.data.slice(1, response.data.length));
-        //     setLoadingData(false);
-        //   })
-        //   .catch((error) => {
-        //     console.log(error);
-        //   });
-    }, [])
 
     return (
 
@@ -114,7 +96,7 @@ function Metadata(props) {
                         </IconButton>
                     </Toolbar>
                 </AppBar>
-                <Table size="small" aria-label="purchases">
+                {props.loadingData ? <Table size="small" aria-label="purchases">
                     <TableHead>
                         <TableRow >
                             <TableCell style={{ fontWeight: "bold" }}>Category</TableCell>
@@ -131,8 +113,8 @@ function Metadata(props) {
                                     component="th"
                                     scope="row"
                                 >
-                                    {viewsCategories &&
-                                        viewsCategories.map((value) => (
+                                    {props.viewsCategories &&
+                                        props.viewsCategories.map((value) => (
                                             <TableRow>
                                                 <TableCell
                                                     component="th"
@@ -149,7 +131,7 @@ function Metadata(props) {
                                                     { }
                                                 </TableCell>
                                                 <TableCell component="th"
-                                                scope="row">
+                                                    scope="row">
                                                     { }
                                                 </TableCell>
                                                 <TableCell align="left">
@@ -165,8 +147,8 @@ function Metadata(props) {
                                     component="th"
                                     scope="row"
                                 >
-                                    {viewsTags &&
-                                        viewsTags.map((value) => (
+                                    {props.viewsTags &&
+                                        props.viewsTags.map((value) => (
                                             <TableRow>
                                                 <TableCell
                                                 >
@@ -192,8 +174,8 @@ function Metadata(props) {
                                             </TableRow>
                                         ))}
                                 </TableCell>
-                                {viewsMetaSchema &&
-                                    viewsMetaSchema.map((value) => (
+                                {props.viewsMetaSchema &&
+                                    props.viewsMetaSchema.map((value) => (
                                         <TableRow>
                                             <TableCell
                                                 component="th"
@@ -224,12 +206,12 @@ function Metadata(props) {
                                     {"11/11/2022"}
                                 </TableCell>
                                 <TableCell align="left">
-                                    {"view"}
+                                    {props.wsType}
                                 </TableCell>
                             </TableRow>
                         )}
                     </TableBody>
-                </Table>
+                </Table> : <></>}
 
                 <AppBar sx={{ position: 'relative' }}>
                     <Toolbar>
