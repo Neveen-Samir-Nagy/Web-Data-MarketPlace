@@ -110,6 +110,16 @@ function New() {
           });
   };
 
+  const handleNewRequest = (key) => {
+    axios.get('http://localhost:3000/access-privilege/' + wsNew[key].database_name + '/' + wsNew[key].service_name + '/' + wsNew[key].service_name + '/' + localStorage.getItem("user"))
+          .then((res) => {
+              console.log(res.data);
+          })
+          .catch((error) => {
+              console.log(error);
+          });
+  }
+
 
 
   return (
@@ -151,7 +161,7 @@ function New() {
                 disableSpacing
               >
                 <IconButton>
-                  <AddShoppingCartIcon />
+                  <AddShoppingCartIcon onClick={()=>handleNewRequest(key)}/>
                 </IconButton>
                 <IconButton>
                   <InfoIcon onClick={()=>handleClickOpen(key)} />
