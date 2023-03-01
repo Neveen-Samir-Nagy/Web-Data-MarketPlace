@@ -37,6 +37,7 @@ function Products() {
   const [viewsCategories, setViewsCategories] = useState([]);
   const [wsType, setWsType] = useState('');
   const [loadingData, setLoadingData] = useState(false);
+  var ip = 'localhost';
 
   console.log('products');
   useEffect(() => {
@@ -54,14 +55,15 @@ function Products() {
     setServiceName(purchasedWs[key].service_name)
     setDB(purchasedWs[key].database_name)
     setOpen(true);
+
     { console.log(purchasedWs[key].service_name) }
     //setViewsMetaSchema([]);
-    var arr_schema = []
+    var arr_schema = [];
+    arr_schema.push(['Name', 'Input', 'Output'])
       axios.get('http://localhost:3000/ws-details/' + purchasedWs[key].database_name + '/' + purchasedWs[key].service_name)
           .then((res) => {
               Object.keys(JSON.parse(res.data)["schema"]).forEach(function(key) {
-                  JSON.parse(res.data)["schema"][key].map((item) => arr_schema.push(item.name));
-                  console.log(JSON.parse(res.data)["schema"][key]);
+                  JSON.parse(res.data)["schema"][key].map((item) => {arr_schema.push([String(item.name), String(item.input), String(item.output)]);});
                 });
                 setViewsMetaSchema(arr_schema);
               //setViewsMetaSchema(JSON.parse(res.data)["schema"][0])
@@ -82,6 +84,10 @@ function Products() {
           });
 
   };
+
+  const handleClickApi = (key) => {
+    window.open('http://'+ip+':9090/'+purchasedWs[key].context);
+  }
 
   return (
     <Navbar>
@@ -123,7 +129,7 @@ function Products() {
                   sx={{ display: "flex", justifyContent: "end" }}
                   disableSpacing
                 >
-                  <IconButton component={Link} to={'/products'}>
+                  <IconButton onClick={() => handleClickApi(key)}>
                     <LaunchIcon />
                   </IconButton>
                   <IconButton>

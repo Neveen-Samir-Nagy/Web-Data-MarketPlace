@@ -42,20 +42,36 @@ import { TransitionProps } from '@mui/material/transitions';
 import { useEffect, useState } from "react";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
+import DoneIcon from '@mui/icons-material/Done';
+import ClearOutlinedIcon from '@mui/icons-material/ClearOutlined';
 function Metadata(props) {
 
     const [Found, setFound] = useState(true);
-    var [fields, setFields] = useState(["id", "name", "age", "number"]);
-    var [values, setValues] = useState([[1, "name", 25, "011"]]);
+    var [fields, setFields] = useState([]);
+    var [values, setValues] = useState([]);
     const [openSampleData, setOpenSampleData] = React.useState(false);
-    
+
 
     const handleClose = () => {
         props.setOpen(false);
+        setOpenSampleData(!openSampleData);
     };
 
     const handlechangeSampleData = () => {
         setOpenSampleData(!openSampleData);
+    }
+
+    const getMetadata = () => {
+        axios
+            .get(
+                "http://localhost:3000/sample-data/" + props.DB + "/" + props.name + ""
+            )
+            .then((response) => {
+                console.log(response.data);
+                setFields(response.data[0]);
+                setValues(response.data.slice(1, response.data.length));
+            })
+
     };
 
 
@@ -84,7 +100,7 @@ function Metadata(props) {
                 <AppBar sx={{ position: 'relative' }}>
                     <Toolbar>
                         <Typography sx={{ flex: 1 }} variant="h6" component="div">
-                            Metadata {props.name} {props.DB}
+                            Metadata {props.name}
                         </Typography>
                         <IconButton
                             edge="start"
@@ -102,7 +118,6 @@ function Metadata(props) {
                             <TableCell style={{ fontWeight: "bold" }}>Category</TableCell>
                             <TableCell style={{ fontWeight: "bold" }}>Tag</TableCell>
                             <TableCell style={{ fontWeight: "bold" }}>Schema</TableCell>
-                            <TableCell style={{ fontWeight: "bold" }}>Modification Date</TableCell>
                             <TableCell style={{ fontWeight: "bold" }}>Type</TableCell>
                         </TableRow>
                     </TableHead>
@@ -137,9 +152,6 @@ function Metadata(props) {
                                                 <TableCell align="left">
                                                     { }
                                                 </TableCell>
-                                                <TableCell align="left">
-                                                    { }
-                                                </TableCell>
                                             </TableRow>
                                         ))}
                                 </TableCell>
@@ -168,14 +180,11 @@ function Metadata(props) {
                                                 <TableCell align="left">
                                                     { }
                                                 </TableCell>
-                                                <TableCell align="left">
-                                                    { }
-                                                </TableCell>
                                             </TableRow>
                                         ))}
                                 </TableCell>
                                 {props.viewsMetaSchema &&
-                                    props.viewsMetaSchema.map((value) => (
+                                    props.viewsMetaSchema.map((value, index) => (
                                         <TableRow>
                                             <TableCell
                                                 component="th"
@@ -191,20 +200,29 @@ function Metadata(props) {
                                             </TableCell>
                                             <TableCell >
                                                 <span style={{ display: "block" }}>
-                                                    {value}
+                                                    {index == 0 ? <TableRow >
+                                                        <TableCell style={{ fontWeight: "bold" }}>Name</TableCell>
+                                                        <TableCell style={{ fontWeight: "bold" }}>Input</TableCell>
+                                                        <TableCell style={{ fontWeight: "bold" }}>Output</TableCell>
+                                                    </TableRow> : <TableRow> <TableCell >
+                                                        {value[0]}
+                                                    </TableCell>
+                                                        <TableCell >
+                                                            {value[1] == 'true' ? <DoneIcon /> : <ClearOutlinedIcon />}
+                                                        </TableCell>
+                                                        <TableCell >
+                                                            {value[2] == 'true' ? <DoneIcon /> : <ClearOutlinedIcon />}
+                                                        </TableCell>
+                                                    </TableRow>
+
+                                                    }
                                                 </span>
-                                            </TableCell>
-                                            <TableCell align="left">
-                                                { }
                                             </TableCell>
                                             <TableCell align="left">
                                                 { }
                                             </TableCell>
                                         </TableRow>
                                     ))}
-                                <TableCell align="left">
-                                    {"11/11/2022"}
-                                </TableCell>
                                 <TableCell align="left">
                                     {props.wsType}
                                 </TableCell>
@@ -222,7 +240,18 @@ function Metadata(props) {
                         <IconButton
                             edge="start"
                             color="inherit"
-                            onClick={handlechangeSampleData}
+                            onClick={
+                                openSampleData
+                                    ? () => {
+                                        handlechangeSampleData();
+                                    }
+                                    : !openSampleData
+                                        ? () => {
+                                            handlechangeSampleData();
+                                            getMetadata();
+                                        }
+                                        : () => { }
+                            }
                             aria-label="expand row"
                             size="small"
                         // onClick={

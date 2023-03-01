@@ -1,4 +1,4 @@
-import { sync_vdp_datacatalog, connect_denodo, create_api, databases, get_ws_url, ws_details, sample_data, views, view_columns, view_details, catalog_permissions, download, webcontainer_services, webservices, create_datasource, create_remoteTable, access_privilege, redploy_ws } from './index.js';
+import { sync_vdp_datacatalog, connect_denodo, create_api, databases, get_ws_url, ws_details, sample_data, views, view_columns, view_details, catalog_permissions, download, webcontainer_services, webservices, create_datasource, create_remoteTable, access_privilege, redploy_ws, sample_data_from_ws, sample_data_link_ws } from './index.js';
 import express from 'express';
 import cors from 'cors';
 import http from 'http';
@@ -90,8 +90,8 @@ app.get('/view-columns/:databaseName/:viewName', (req, res) => {
 });
 
 
-app.get('/sample-data/:databaseName/:viewName/:limit', (req, res) => {
-    const data = sample_data(String(req.params.databaseName), String(req.params.viewName), parseInt(req.params.limit)).then(function (results) {
+app.get('/sample-data/:databaseName/:wsName/', (req, res) => {
+    const data = sample_data_link_ws(1, '//'+ip+':9999/admin', String(req.params.databaseName), String(req.params.wsName)).then(function (results) {
         //console.log(results);
         var samples = []
         if (typeof results === 'undefined') {

@@ -133,6 +133,41 @@ export var view_columns = function (serverId = 1, uri = '//'+ip+':9999/admin', d
     })
 };
 
+export var sample_data_link_ws = function (serverId = 1, uri = '//'+ip+':9999/admin', databaseName = 'testdb', wsName) {
+    return new Promise((resolve, reject) => {
+        request({
+            method: 'GET',
+            uri: 'http://localhost:9090/server/'+databaseName+'/'+wsName+'?$displayRESTfulReferences=true&$format=JSON',
+            headers: { 'Authorization': 'Basic YWRtaW46YWRtaW4=',
+            'Content-Type': 'application/json' }
+        }, function (error, response, body) {
+            if (!error && response.statusCode == 200) {
+                console.log(JSON.parse(body)['views-metadata'][0]['name']);
+                return resolve(sample_data_from_ws(databaseName, wsName, JSON.parse(body)['views-metadata'][0]['name']));
+            } else {
+                console.log(error);
+            }
+        })
+    })
+};
+
+export var sample_data_from_ws = function (databaseName, wsName, viewName) {
+    return new Promise((resolve, reject) => {
+        request({
+            method: 'GET',
+            uri: 'http://localhost:9090/server/'+databaseName+'/'+wsName+'/views/' + viewName+'?$displayRESTfulReferences=true&$format=JSON',
+            headers: { 'Authorization': 'Basic YWRtaW46YWRtaW4=',
+            'Content-Type': 'application/json' }
+        }, function (error, response, body) {
+            if (!error && response.statusCode == 200) {
+                return resolve(JSON.parse(body).elements.slice(0,10));
+            } else {
+                console.log(error);
+            }
+        })
+    })
+};
+
 // view_columns(serverId = 1, uri = '//'+ip+':9999/admin', databaseName = 'test', viewName = 'bv_datacatalog_databases');
 
 export var sample_data = function (databaseName = 'admin', viewName, limit = 10) {
