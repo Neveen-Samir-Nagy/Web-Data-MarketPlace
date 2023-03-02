@@ -202,16 +202,20 @@ function Metadata(props) {
                                                 <span style={{ display: "block" }}>
                                                     {index == 0 ? <TableRow >
                                                         <TableCell style={{ fontWeight: "bold" }}>Name</TableCell>
+                                                        <TableCell style={{ fontWeight: "bold" }}>Name</TableCell>
                                                         <TableCell style={{ fontWeight: "bold" }}>Input</TableCell>
                                                         <TableCell style={{ fontWeight: "bold" }}>Output</TableCell>
                                                     </TableRow> : <TableRow> <TableCell >
                                                         {value[0]}
                                                     </TableCell>
-                                                        <TableCell >
-                                                            {value[1] == 'true' ? <DoneIcon /> : <ClearOutlinedIcon />}
-                                                        </TableCell>
+                                                    <TableCell >
+                                                        {value[1]}
+                                                    </TableCell>
                                                         <TableCell >
                                                             {value[2] == 'true' ? <DoneIcon /> : <ClearOutlinedIcon />}
+                                                        </TableCell>
+                                                        <TableCell >
+                                                            {value[3] == 'true' ? <DoneIcon /> : <ClearOutlinedIcon />}
                                                         </TableCell>
                                                     </TableRow>
 

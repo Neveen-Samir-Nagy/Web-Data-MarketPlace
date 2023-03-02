@@ -3,6 +3,9 @@ import jinst from 'jdbc/lib/jinst.js';
 import asyncjs from 'async';
 import request from 'request';
 import excel from 'exceljs';
+// import Blob from 'node:buffer';
+// import pkg from 'file-saver';
+// const { saveAs } = pkg;
 
 var categories = [];
 var denododb;
@@ -142,7 +145,6 @@ export var sample_data_link_ws = function (serverId = 1, uri = '//'+ip+':9999/ad
             'Content-Type': 'application/json' }
         }, function (error, response, body) {
             if (!error && response.statusCode == 200) {
-                console.log(JSON.parse(body)['views-metadata'][0]['name']);
                 return resolve(sample_data_from_ws(databaseName, wsName, JSON.parse(body)['views-metadata'][0]['name']));
             } else {
                 console.log(error);
@@ -160,7 +162,7 @@ export var sample_data_from_ws = function (databaseName, wsName, viewName) {
             'Content-Type': 'application/json' }
         }, function (error, response, body) {
             if (!error && response.statusCode == 200) {
-                return resolve(JSON.parse(body).elements.slice(0,10));
+                return resolve(body);
             } else {
                 console.log(error);
             }
@@ -436,6 +438,100 @@ export var get_ws_url = function (databaseName, viewName) {
     return url;
 };
 
+export var access_privilege_on_database = (databaseName, userName) => {
+    return new Promise( (resolve, reject) => {
+         denododb.reserve(function (err, connObj) {
+            if (connObj) {
+                var conn = connObj.conn;
+                // Query the database.
+                asyncjs.series([
+                     function () {
+                        // Select statement example.
+                         conn.createStatement( function (err, statement) {
+                            if (err) {
+                                console.log(err);
+                            } else {
+                                statement.setFetchSize(100,  function (err) {
+                                    if (err) {
+                                        console.log(err);
+                                    } else {
+                                        //Execute a query
+                                        statement.executeQuery("ALTER USER "+userName+" GRANT CONNECT ON "+databaseName+";",)
+                                        
+                                    }
+                                });
+                            }
+                        });
+                    }
+                ]);
+            }
+        })
+    })
+};
+
+export var access_privilege_on_view = (databaseName, viewName, userName) => {
+    return new Promise( (resolve, reject) => {
+         denododb.reserve(function (err, connObj) {
+            if (connObj) {
+                var conn = connObj.conn;
+                // Query the database.
+                asyncjs.series([
+                     function () {
+                        // Select statement example.
+                         conn.createStatement( function (err, statement) {
+                            if (err) {
+                                console.log(err);
+                            } else {
+                                statement.setFetchSize(100,  function (err) {
+                                    if (err) {
+                                        console.log(err);
+                                    } else {
+                                        //Execute a query
+                                        statement.executeQuery("ALTER USER "+userName+" GRANT METADATA,EXECUTE ON "+databaseName+"."+viewName+";",)
+                                        
+                                    }
+                                });
+                            }
+                        });
+                    }
+                ]);
+            }
+        })
+    })
+};
+
+export var access_privilege_on_ws = (wsName, userName) => {
+    return new Promise( (resolve, reject) => {
+         denododb.reserve(function (err, connObj) {
+            if (connObj) {
+                var conn = connObj.conn;
+                // Query the database.
+                asyncjs.series([
+                     function () {
+                        // Select statement example.
+                         conn.createStatement( function (err, statement) {
+                            if (err) {
+                                console.log(err);
+                            } else {
+                                statement.setFetchSize(100,  function (err) {
+                                    if (err) {
+                                        console.log(err);
+                                    } else {
+                                        //Execute a query
+                                        statement.executeQuery("ALTER USER "+userName+" GRANT METADATA ON webservice "+wsName+";",
+                                        
+                                        );                                        
+                                    }
+                                });
+                            }
+                        });
+                    }
+                ]);
+            }
+        })
+    })
+};
+
 export var access_privilege = (databaseName, viewName, wsName, userName) => {
     return new Promise( (resolve, reject) => {
          denododb.reserve(function (err, connObj) {
@@ -455,45 +551,9 @@ export var access_privilege = (databaseName, viewName, wsName, userName) => {
                                     } else {
                                         //Execute a query
                                         connect_denodo('admin', password_admin, databaseName);
-                                        statement.executeQuery("ALTER USER "+userName+" GRANT CONNECT ON "+databaseName+";",
-                                        
-
-                                        statement.executeQuery("ALTER USER "+userName+" GRANT METADATA,EXECUTE ON "+databaseName+"."+viewName+";",
-                                        
-
-                                        statement.executeQuery("desc vql webservice "+databaseName+"."+wsName+" ('includeDependencies'='no','replaceExistingElements'='yes','dropElements'='no');",
-                                        function (err, resultset) {
-                                            if (err) {
-                                                console.log(err);
-                                            } else {
-                                                resultset.toObjArray(function (err, results) {
-                                                    //Printing number of records
-                                                    if (typeof results === 'undefined') {
-                                                        return resolve([]);
-                                                    }
-                                                    if (results.length > 0) {
-                                                        // console.log("Record count: " + results.length);
-                                                        var first_index = results[0].result.indexOf("(BASIC VDP");
-                                                        var first_part = results[0].result.substring(0, first_index+"(BASIC VDP".length);
-                                                        var second_index = results[0].result.indexOf("RESOURCES (");
-                                                        var second_part = results[0].result.substring(second_index, results[0].result.length);
-                                                        var middle_part = results[0].result.substring(first_index+"(BASIC VDP".length, second_index);
-                                                        var users = " VDPACCEPTEDUSERS "+"'"+userName+","+middle_part.substring(middle_part.indexOf("'")+1, middle_part.length)
-                                                        results[0].result = first_part + users + second_part;
-                                                        console.log(first_part + users + second_part);
-                                                        return resolve(results);
-                                                    } else {
-                                                        console.log(err);
-                                                    }
-                                                }
-                                                );
-                                            }
-                                        }
-                                        )
-                                        )
-                                        
-                                        );
-                                        
+                                        access_privilege_on_database(databaseName, userName);
+                                        access_privilege_on_view(databaseName, viewName, userName);                                  
+                                        access_privilege_on_ws(wsName, userName);
                                     }
                                 });
                             }
@@ -538,18 +598,18 @@ export var redploy_ws = (wsName, query) => {
 
 // create_api('bv_dev_usecase_roles');
 
-export var download = (req, res, objs) => {
+export var download = (req, res, objs, name) => {
     var workbook = new excel.Workbook();
     var worksheet = workbook.addWorksheet("Tutorials");
     var headers = Object.keys(objs[0]);
+    console.log("headers",headers);
     var columns = [];
     headers.forEach((head) => {
         columns.push({ header: head, key: head});
     });
     worksheet.columns = columns;
-    console.log(objs);
     worksheet.addRows(objs); // Add data in worksheet
-    console.log(worksheet.getRow(2).values);
+    console.log("second row",worksheet.getRow(2).values);
 
     // Making first line in excel bold
     worksheet.getRow(1).eachCell((cell) => {
@@ -557,27 +617,32 @@ export var download = (req, res, objs) => {
     });
 
     try {
+        res.status(200);
         res.setHeader(
             "Content-Type",
             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
           );
-          res.setHeader(
+        res.setHeader(
             "Content-Disposition",
             "attachment; filename=" + "tutorials.xlsx"
           );
-        const data = workbook.xlsx.write(res)
-            .then(() => {
-                res.send({
-                    status: "success",
-                    message: "file successfully downloaded",
-                    path: 'tutorials.xlsx',
-                });
-            });
+        //  const data = workbook.xlsx.write(res)
+        //     .then(() => {
+        //         res.end();
+        //         //res.attachment("tutorials.xlsx");
+        //         //res.end();
+        //         // console.log('Done');
+        //     });
+        workbook.xlsx.writeBuffer().then(function(buffer) {
+            // done
+            console.log(buffer);
+        
+            var buffer = Buffer.from(buffer);
+            var arraybuffer = Uint8Array.from(buffer).buffer;
+            saveAs(arraybuffer, "tutorials.xlsx");
+          });
     } catch (err) {
-        res.send({
-            status: "error",
-            message: "Something went wrong",
-        });
+        console.log(err);
     }
 };
 

@@ -17,7 +17,7 @@ import ControlPoint from "@mui/icons-material/ControlPoint";
 import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
 import Navbar from "./Navbar";
 import Metadata from "./metadata";
-
+import DownloadIcon from '@mui/icons-material/Download';
 import { Box } from "@mui/system";
 import axios from "axios";
 import { useEffect, useState } from "react";
@@ -50,6 +50,15 @@ function Products() {
         console.log(response.data);
       })
   }, [])
+  const handleDownload = async (key) => {
+    await axios.get('http://localhost:3000/download-excel/' + purchasedWs[key].database_name + '/' + purchasedWs[key].service_name + '/' + purchasedWs[key].service_name)
+    .then((res)=>{
+      console.log(res)
+      return (res.data)
+    })
+    .catch((e)=>{console.log(e.message)})
+
+  }
 
   const handleClickOpen = (key) => {
     setServiceName(purchasedWs[key].service_name)
@@ -59,11 +68,11 @@ function Products() {
     { console.log(purchasedWs[key].service_name) }
     //setViewsMetaSchema([]);
     var arr_schema = [];
-    arr_schema.push(['Name', 'Input', 'Output'])
+    arr_schema.push(['Name', 'Type', 'Input', 'Output'])
       axios.get('http://localhost:3000/ws-details/' + purchasedWs[key].database_name + '/' + purchasedWs[key].service_name)
           .then((res) => {
               Object.keys(JSON.parse(res.data)["schema"]).forEach(function(key) {
-                  JSON.parse(res.data)["schema"][key].map((item) => {arr_schema.push([String(item.name), String(item.input), String(item.output)]);});
+                  JSON.parse(res.data)["schema"][key].map((item) => {arr_schema.push([String(item.name), String(item.type), String(item.input), String(item.output)]);});
                 });
                 setViewsMetaSchema(arr_schema);
               //setViewsMetaSchema(JSON.parse(res.data)["schema"][0])
@@ -135,6 +144,10 @@ function Products() {
                   <IconButton>
                     <InfoIcon onClick={() => handleClickOpen(key)} />
                   </IconButton>
+                  <IconButton>
+                    <DownloadIcon onClick={() => handleDownload(key)} />
+                  </IconButton>
+                  
                 </CardActions>
               </Card>
               <Metadata open={open} DB={DB} name={serviceName} setOpen={setOpen} viewsCategories={viewsCategories}

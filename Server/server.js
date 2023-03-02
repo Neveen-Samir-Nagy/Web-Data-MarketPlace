@@ -98,6 +98,7 @@ app.get('/sample-data/:databaseName/:wsName/', (req, res) => {
             return;
         }
         if (results.length != 0) {
+            results = JSON.parse(results).elements.slice(0,10)
             samples.push(Object.getOwnPropertyNames(results[0]));
             results.forEach(element => {
                 samples.push(Object.values(element));
@@ -119,9 +120,11 @@ app.get('/get-api/:databaseName/:viewName', (req, res) => {
     res.send(url);
 });
 
-app.get('/download-excel', (req, res) => {
-    const database = sample_data('testdb', 'bv_dmp_test_download', 9002).then(function (results) {
-        var responce = download(req, res, results);
+app.get('/download-excel/:databaseName/:wsName/:filename', (req, res) => {
+    console.log(String(req.params.databaseName), String(req.params.wsName),  String(req.params.filename))
+    const database = sample_data_link_ws(1, '//'+ip+':9999/admin', String(req.params.databaseName), String(req.params.wsName)).then(function (results) {
+        console.log(String(req.params.databaseName), String(req.params.wsName),  String(req.params.filename))
+        var responce = download(req, res, JSON.parse(results).elements, String(req.params.filename));
     }
     );
 });
@@ -134,14 +137,13 @@ app.post('/create-datasource', (req, res) => {
 });
 
 app.get('/create-remoteTable/:remoteTableName/:database_source/:data_source/:database_view/:view', (req, res) => {
-    const database = create_remoteTable(String(req.params.remoteTableName), String(req.params.database_source), String(req.params.data_source), String(req.params.database_view), String(req.params.view)).then(function (results) {
-        res.send(results);
-    });
+    const database = create_remoteTable(String(req.params.remoteTableName), String(req.params.database_source), String(req.params.data_source), String(req.params.database_view), String(req.params.view))
+    res.send('Done');
 });
 
 app.get('/access-privilege/:databaseName/:viewName/:wsName/:userName', (req, res) => {
     const database = access_privilege(String(req.params.databaseName),String(req.params.viewName), String(req.params.wsName), String(req.params.userName)).then(function (results) {
-        redploy_ws(String(req.params.wsName), results[0].result);
+        //redploy_ws(String(req.params.wsName), results[0].result);
         res.send('Done');
     });
 });

@@ -84,11 +84,11 @@ function New() {
     {console.log(serviceName)}
 
     var arr_schema = [];
-    arr_schema.push(['Name', 'Input', 'Output']);
+    arr_schema.push(['Name', 'Type', 'Input', 'Output']);
       axios.get('http://localhost:3000/ws-details/' + wsNew[key].database_name + '/' + wsNew[key].service_name)
           .then((res) => {
               Object.keys(JSON.parse(res.data)["schema"]).forEach(function(key) {
-                  JSON.parse(res.data)["schema"][key].map((item) => {arr_schema.push([String(item.name), String(item.input), String(item.output)])});
+                  JSON.parse(res.data)["schema"][key].map((item) => {arr_schema.push([String(item.name), String(item.type), String(item.input), String(item.output)])});
                   console.log(JSON.parse(res.data)["schema"][key]);
                 });
                 setViewsMetaSchema(arr_schema);
@@ -118,6 +118,7 @@ function New() {
           .catch((error) => {
               console.log(error);
           });
+          window.location.reload(true);
   }
 
 
