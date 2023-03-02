@@ -598,53 +598,53 @@ export var redploy_ws = (wsName, query) => {
 
 // create_api('bv_dev_usecase_roles');
 
-export var download = (req, res, objs, name) => {
-    var workbook = new excel.Workbook();
-    var worksheet = workbook.addWorksheet("Tutorials");
-    var headers = Object.keys(objs[0]);
-    console.log("headers",headers);
-    var columns = [];
-    headers.forEach((head) => {
-        columns.push({ header: head, key: head});
-    });
-    worksheet.columns = columns;
-    worksheet.addRows(objs); // Add data in worksheet
-    console.log("second row",worksheet.getRow(2).values);
+// export var download = (req, res, objs, name) => {
+//     var workbook = new excel.Workbook();
+//     var worksheet = workbook.addWorksheet("Tutorials");
+//     var headers = Object.keys(objs[0]);
+//     console.log("headers",headers);
+//     var columns = [];
+//     headers.forEach((head) => {
+//         columns.push({ header: head, key: head});
+//     });
+//     worksheet.columns = columns;
+//     worksheet.addRows(objs); // Add data in worksheet
+//     console.log("second row",worksheet.getRow(2).values);
 
-    // Making first line in excel bold
-    worksheet.getRow(1).eachCell((cell) => {
-        cell.font = { bold: true };
-    });
+//     // Making first line in excel bold
+//     worksheet.getRow(1).eachCell((cell) => {
+//         cell.font = { bold: true };
+//     });
 
-    try {
-        res.status(200);
-        res.setHeader(
-            "Content-Type",
-            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-          );
-        res.setHeader(
-            "Content-Disposition",
-            "attachment; filename=" + "tutorials.xlsx"
-          );
-        //  const data = workbook.xlsx.write(res)
-        //     .then(() => {
-        //         res.end();
-        //         //res.attachment("tutorials.xlsx");
-        //         //res.end();
-        //         // console.log('Done');
-        //     });
-        workbook.xlsx.writeBuffer().then(function(buffer) {
-            // done
-            console.log(buffer);
+//     try {
+//         res.status(200);
+//         res.setHeader(
+//             "Content-Type",
+//             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+//           );
+//         res.setHeader(
+//             "Content-Disposition",
+//             "attachment; filename=" + "tutorials.xlsx"
+//           );
+//          const data = workbook.xlsx.write(res)
+//             .then(() => {
+//                 res.end();
+//                 //res.attachment("tutorials.xlsx");
+//                 //res.end();
+//                 // console.log('Done');
+//             });
+//         // workbook.xlsx.writeBuffer().then(function(buffer) {
+//         //     // done
+//         //     console.log(buffer);
         
-            var buffer = Buffer.from(buffer);
-            var arraybuffer = Uint8Array.from(buffer).buffer;
-            saveAs(arraybuffer, "tutorials.xlsx");
-          });
-    } catch (err) {
-        console.log(err);
-    }
-};
+//         //     var buffer = Buffer.from(buffer);
+//         //     var arraybuffer = Uint8Array.from(buffer).buffer;
+//         //     saveAs(arraybuffer, "tutorials.xlsx");
+//         //   });
+//     } catch (err) {
+//         console.log(err);
+//     }
+// };
 
 export var create_datasource = (databaseName, datasourceType = 'JDBC', datasourceName, driverClassName, databaseURL, user, password, classPath, database, version, timeout) => {
     return new Promise( (resolve, reject) => {

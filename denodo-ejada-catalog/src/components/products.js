@@ -20,6 +20,8 @@ import Metadata from "./metadata";
 import DownloadIcon from '@mui/icons-material/Download';
 import { Box } from "@mui/system";
 import axios from "axios";
+import excel from "exceljs";
+import { saveAs } from "file-saver";
 import { useEffect, useState } from "react";
 
 import { Button, Container, Divider } from "@mui/material";
@@ -50,15 +52,48 @@ function Products() {
         console.log(response.data);
       })
   }, [])
+
   const handleDownload = async (key) => {
     await axios.get('http://localhost:3000/download-excel/' + purchasedWs[key].database_name + '/' + purchasedWs[key].service_name + '/' + purchasedWs[key].service_name)
-    .then((res)=>{
-      console.log(res)
-      return (res.data)
-    })
-    .catch((e)=>{console.log(e.message)})
+      .then((res) => {
+        download(res.data, String(purchasedWs[key].service_name));
+      })
+      .catch((e) => { console.log(e.message) })
 
   }
+
+  const download = (objs, name) => {
+    var workbook = new excel.Workbook();
+    var worksheet = workbook.addWorksheet("Tutorials");
+    var headers = Object.keys(objs[0]);
+    console.log("headers", headers);
+    var columns = [];
+    headers.forEach((head) => {
+      columns.push({ header: head, key: head });
+    });
+    worksheet.columns = columns;
+    worksheet.addRows(objs); // Add data in worksheet
+    console.log("second row", worksheet.getRow(2).values);
+
+    // Making first line in excel bold
+    worksheet.getRow(1).eachCell((cell) => {
+      cell.font = { bold: true };
+    });
+
+    try {
+      saveFile(name+'_data.xlsx', workbook)
+
+      async function saveFile(fileName, workbook) {
+        const xls64 = await workbook.xlsx.writeBuffer({ base64: true })
+        saveAs(
+          new Blob([xls64], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }),
+          fileName
+        )
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  };
 
   const handleClickOpen = (key) => {
     setServiceName(purchasedWs[key].service_name)
@@ -69,33 +104,33 @@ function Products() {
     //setViewsMetaSchema([]);
     var arr_schema = [];
     arr_schema.push(['Name', 'Type', 'Input', 'Output'])
-      axios.get('http://localhost:3000/ws-details/' + purchasedWs[key].database_name + '/' + purchasedWs[key].service_name)
-          .then((res) => {
-              Object.keys(JSON.parse(res.data)["schema"]).forEach(function(key) {
-                  JSON.parse(res.data)["schema"][key].map((item) => {arr_schema.push([String(item.name), String(item.type), String(item.input), String(item.output)]);});
-                });
-                setViewsMetaSchema(arr_schema);
-              //setViewsMetaSchema(JSON.parse(res.data)["schema"][0])
-              setViewsTags(
-                  JSON.parse(res.data)["tags"].map((item) => item.name)
-              );
-              console.log(viewsMetaSchema);
+    axios.get('http://localhost:3000/ws-details/' + purchasedWs[key].database_name + '/' + purchasedWs[key].service_name)
+      .then((res) => {
+        Object.keys(JSON.parse(res.data)["schema"]).forEach(function (key) {
+          JSON.parse(res.data)["schema"][key].map((item) => { arr_schema.push([String(item.name), String(item.type), String(item.input), String(item.output)]); });
+        });
+        setViewsMetaSchema(arr_schema);
+        //setViewsMetaSchema(JSON.parse(res.data)["schema"][0])
+        setViewsTags(
+          JSON.parse(res.data)["tags"].map((item) => item.name)
+        );
+        console.log(viewsMetaSchema);
 
-              setViewsCategories(
-                  JSON.parse(res.data)["categories"].map((item) => item.name)
-              );
-              setWsType(JSON.parse(res.data)["wsType"]);
-              //setLoadingData(false);
-              setLoadingData(true);
-          })
-          .catch((error) => {
-              console.log(error);
-          });
+        setViewsCategories(
+          JSON.parse(res.data)["categories"].map((item) => item.name)
+        );
+        setWsType(JSON.parse(res.data)["wsType"]);
+        //setLoadingData(false);
+        setLoadingData(true);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
 
   };
 
   const handleClickApi = (key) => {
-    window.open('http://'+ip+':9090/'+purchasedWs[key].context);
+    window.open('http://' + ip + ':9090/' + purchasedWs[key].context);
   }
 
   return (
@@ -144,14 +179,14 @@ function Products() {
                   <IconButton>
                     <InfoIcon onClick={() => handleClickOpen(key)} />
                   </IconButton>
-                  <IconButton>
-                    <DownloadIcon onClick={() => handleDownload(key)} />
-                  </IconButton>
                   
+                    {purchasedWs[key].service_type == 'REST' ? <IconButton><DownloadIcon onClick={() => handleDownload(key)} />  </IconButton> : <></>} 
+                  
+
                 </CardActions>
               </Card>
               <Metadata open={open} DB={DB} name={serviceName} setOpen={setOpen} viewsCategories={viewsCategories}
-              viewsTags={viewsTags} viewsMetaSchema={viewsMetaSchema} loadingData={loadingData} wsType={wsType}/>
+                viewsTags={viewsTags} viewsMetaSchema={viewsMetaSchema} loadingData={loadingData} wsType={wsType} />
             </Box>
             : <></>))}
         </Box>

@@ -124,7 +124,8 @@ app.get('/download-excel/:databaseName/:wsName/:filename', (req, res) => {
     console.log(String(req.params.databaseName), String(req.params.wsName),  String(req.params.filename))
     const database = sample_data_link_ws(1, '//'+ip+':9999/admin', String(req.params.databaseName), String(req.params.wsName)).then(function (results) {
         console.log(String(req.params.databaseName), String(req.params.wsName),  String(req.params.filename))
-        var responce = download(req, res, JSON.parse(results).elements, String(req.params.filename));
+        //var responce = download(req, res, JSON.parse(results).elements, String(req.params.filename));
+        res.send(JSON.parse(results).elements);
     }
     );
 });
