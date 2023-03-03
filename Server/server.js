@@ -1,8 +1,8 @@
-import { sync_vdp_datacatalog, connect_denodo, create_api, databases, get_ws_url, ws_details, sample_data, views, view_columns, view_details, catalog_permissions, download, webcontainer_services, webservices, create_datasource, create_remoteTable, access_privilege, redploy_ws, sample_data_from_ws, sample_data_link_ws } from './index.js';
+import { sync_vdp_datacatalog, connect_denodo, create_api, databases, get_ws_url, ws_details, sample_data, views, view_columns, view_details, catalog_permissions, webcontainer_services, webservices, create_datasource, create_remoteTable, access_privilege, redploy_ws, sample_data_from_ws, sample_data_link_ws, openApi } from './index.js';
 import express from 'express';
 import cors from 'cors';
-import http from 'http';
 import bp from 'body-parser';
+import http from 'http';
 
 const app = express();
 var denododb;
@@ -12,7 +12,9 @@ app.use(bp.json());
 app.use(bp.urlencoded({ extended: true }));
 var server = http.Server(app);
 
+var protocol_denodo = 'http';
 var ip = 'localhost';
+var port_denodo = '9090';
 
 server.listen(port, () => {
     console.log(`App listening on port ${port}`)
@@ -111,7 +113,6 @@ app.get('/sample-data/:databaseName/:wsName/', (req, res) => {
 
 app.get('/create-api/:databaseName/:viewName', (req, res) => {
     create_api(String(req.params.databaseName), String(req.params.viewName), 'ws_' + String(req.params.viewName));
-    //res.send('http://'+ip+':9090/server/'+String(req.params.databaseName)+'/ws_'+String(req.params.viewName)+'/views/'+String(req.params.viewName)+'');
 });
 
 app.get('/get-api/:databaseName/:viewName', (req, res) => {
@@ -147,6 +148,11 @@ app.get('/access-privilege/:databaseName/:viewName/:wsName/:userName', (req, res
         //redploy_ws(String(req.params.wsName), results[0].result);
         res.send('Done');
     });
+});
+
+app.get('/more-details/:databaseName/:wsName', (req, res) => {
+    const api = openApi(String(req.params.databaseName), String(req.params.wsName))
+    res.send(api);
 });
 
 // views(1, '//'+ip+':9999/admin', 'testdb', 50,1);

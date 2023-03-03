@@ -23,6 +23,8 @@ import axios from "axios";
 import excel from "exceljs";
 import { saveAs } from "file-saver";
 import { useEffect, useState } from "react";
+import MoreVertIcon from '@mui/icons-material/MoreVert';
+import UnfoldMoreIcon from '@mui/icons-material/UnfoldMore';
 
 import { Button, Container, Divider } from "@mui/material";
 import { Link } from "react-router-dom";
@@ -40,6 +42,8 @@ function Products() {
   const [wsType, setWsType] = useState('');
   const [loadingData, setLoadingData] = useState(false);
   var ip = 'localhost';
+  var port_denodo = '9090';
+  var protocol_denodo = 'http';
 
   console.log('products');
   useEffect(() => {
@@ -130,7 +134,15 @@ function Products() {
   };
 
   const handleClickApi = (key) => {
-    window.open('http://' + ip + ':9090/' + purchasedWs[key].context);
+    window.open(''+protocol_denodo+'://'+ip+':'+port_denodo + purchasedWs[key].context);
+  }
+
+  const handleMoreDetails = (key) => {
+    axios.get('http://localhost:3000/more-details/' + purchasedWs[key].database_name + '/' + purchasedWs[key].service_name)
+      .then((res) => {
+        window.open(res.data);
+      })
+      .catch((e) => { console.log(e.message) })
   }
 
   return (
@@ -179,10 +191,8 @@ function Products() {
                   <IconButton>
                     <InfoIcon onClick={() => handleClickOpen(key)} />
                   </IconButton>
-                  
                     {purchasedWs[key].service_type == 'REST' ? <IconButton><DownloadIcon onClick={() => handleDownload(key)} />  </IconButton> : <></>} 
-                  
-
+                    {purchasedWs[key].service_type == 'REST' ? <IconButton><UnfoldMoreIcon onClick={() => handleMoreDetails(key)} />  </IconButton> : <></>} 
                 </CardActions>
               </Card>
               <Metadata open={open} DB={DB} name={serviceName} setOpen={setOpen} viewsCategories={viewsCategories}

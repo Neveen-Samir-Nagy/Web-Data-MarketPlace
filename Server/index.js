@@ -9,7 +9,9 @@ import excel from 'exceljs';
 
 var categories = [];
 var denododb;
+var protocol_denodo = 'http';
 var ip = 'localhost';
+var port_denodo = '9090';
 var password_admin = 'admin';
 
 
@@ -21,7 +23,7 @@ export var sync_vdp_datacatalog = function () {
         };
         var dataString = '{ "allServers": "true", "priority": "server_with_local_changes", "proceedWithConflicts": "SERVER" }';
         request({
-            url: 'http://'+ip+':9090/denodo-data-catalog/public/api/element-management/all/synchronize/all-servers',
+            url: ''+protocol_denodo+'://'+ip+':'+port_denodo+'/denodo-data-catalog/public/api/element-management/all/synchronize/all-servers',
             method: 'POST',
             headers: headers,
             body: dataString
@@ -71,7 +73,7 @@ export var databases = function (serverId = 1, uri = '//'+ip+':9999/admin') {
     return new Promise((resolve, reject) => {
         request({
             method: 'GET',
-            uri: 'http://'+ip+':9090/denodo-data-catalog/public/api/category-management/categories?serverId=' + serverId + '&uri=' + uri + '',
+            uri: ''+protocol_denodo+'://'+ip+':'+port_denodo+'/denodo-data-catalog/public/api/category-management/categories?serverId=' + serverId + '&uri=' + uri + '',
             headers: { 'Authorization': 'Basic YWRtaW46YWRtaW4=', 'Content-Type': 'application/json' }
         }, function (error, response, body) {
             if (!error && response.statusCode == 200) {
@@ -90,7 +92,7 @@ export var views = function (serverId = 1, uri = '//'+ip+':9999/admin', database
     return new Promise((resolve, reject) => {
         request({
             method: 'GET',
-            uri: 'http://'+ip+':9090/denodo-data-catalog/public/api/database-management/vdp/views?databaseName=' + databaseName + '&limit=' + limit + '&offset=' + offest + '&serverId=' + serverId + '&uri=' + uri + '',
+            uri: ''+protocol_denodo+'://'+ip+':'+port_denodo+'/denodo-data-catalog/public/api/database-management/vdp/views?databaseName=' + databaseName + '&limit=' + limit + '&offset=' + offest + '&serverId=' + serverId + '&uri=' + uri + '',
             headers: { 'Authorization': 'Basic YWRtaW46YWRtaW4=', 'Content-Type': 'application/json' }
         }, function (error, response, body) {
             if (!error && response.statusCode == 200) {
@@ -108,7 +110,7 @@ export var view_details = function (serverId = 1, uri = '//'+ip+':9999/admin', d
     return new Promise((resolve, reject) => {
         request({
             method: 'GET',
-            uri: 'http://'+ip+':9090/denodo-data-catalog/public/api/view-details?databaseName=' + databaseName + '&serverId=' + serverId + '&uri=' + uri + '&viewName=' + viewName + '',
+            uri: ''+protocol_denodo+'://'+ip+':'+port_denodo+'/denodo-data-catalog/public/api/view-details?databaseName=' + databaseName + '&serverId=' + serverId + '&uri=' + uri + '&viewName=' + viewName + '',
             headers: { 'Authorization': 'Basic YWRtaW46YWRtaW4=' }
         }, function (error, response, body) {
             if (!error && response.statusCode == 200) {
@@ -124,7 +126,7 @@ export var view_columns = function (serverId = 1, uri = '//'+ip+':9999/admin', d
     return new Promise((resolve, reject) => {
         request({
             method: 'GET',
-            uri: 'http://'+ip+':9090/denodo-data-catalog/public/api/views/columns?databaseName=' + databaseName + '&serverId=' + serverId + '&uri=' + uri + '&viewName=' + viewName + '',
+            uri: ''+protocol_denodo+'://'+ip+':'+port_denodo+'/denodo-data-catalog/public/api/views/columns?databaseName=' + databaseName + '&serverId=' + serverId + '&uri=' + uri + '&viewName=' + viewName + '',
             headers: { 'Authorization': 'Basic YWRtaW46YWRtaW4=' }
         }, function (error, response, body) {
             if (!error && response.statusCode == 200) {
@@ -140,7 +142,7 @@ export var sample_data_link_ws = function (serverId = 1, uri = '//'+ip+':9999/ad
     return new Promise((resolve, reject) => {
         request({
             method: 'GET',
-            uri: 'http://localhost:9090/server/'+databaseName+'/'+wsName+'?$displayRESTfulReferences=true&$format=JSON',
+            uri: ''+protocol_denodo+'://'+ip+':'+port_denodo+'/server/'+databaseName+'/'+wsName+'?$displayRESTfulReferences=true&$format=JSON',
             headers: { 'Authorization': 'Basic YWRtaW46YWRtaW4=',
             'Content-Type': 'application/json' }
         }, function (error, response, body) {
@@ -157,7 +159,7 @@ export var sample_data_from_ws = function (databaseName, wsName, viewName) {
     return new Promise((resolve, reject) => {
         request({
             method: 'GET',
-            uri: 'http://localhost:9090/server/'+databaseName+'/'+wsName+'/views/' + viewName+'?$displayRESTfulReferences=true&$format=JSON',
+            uri: ''+protocol_denodo+'://'+ip+':'+port_denodo+'/server/'+databaseName+'/'+wsName+'/views/' + viewName+'?$displayRESTfulReferences=true&$format=JSON',
             headers: { 'Authorization': 'Basic YWRtaW46YWRtaW4=',
             'Content-Type': 'application/json' }
         }, function (error, response, body) {
@@ -326,7 +328,7 @@ export var ws_details = function (serverId = 1, uri = '//'+ip+':9999/admin', dat
     return new Promise((resolve, reject) => {
         request({
             method: 'GET',
-            uri: 'http://'+ip+':9090/denodo-data-catalog/public/api/webservice-details?databaseName=' + databaseName + '&serverId=' + serverId + '&uri=' + uri + '&webserviceName=' + wsName + '',
+            uri: ''+protocol_denodo+'://'+ip+':'+port_denodo+'/denodo-data-catalog/public/api/webservice-details?databaseName=' + databaseName + '&serverId=' + serverId + '&uri=' + uri + '&webserviceName=' + wsName + '',
             headers: { 'Authorization': 'Basic YWRtaW46YWRtaW4=' }
         }, function (error, response, body) {
             if (!error && response.statusCode == 200) {
@@ -434,7 +436,7 @@ export var create_api = function (databaseName, viewName, wsName) {
 };
 
 export var get_ws_url = function (databaseName, viewName) {
-    var url = 'http://'+ip+':9090/denodo-restfulws/' + databaseName + '/views/' + viewName;
+    var url = ''+protocol_denodo+'://'+ip+':'+port_denodo+'/denodo-restfulws/' + databaseName + '/views/' + viewName;
     return url;
 };
 
@@ -741,4 +743,9 @@ export var create_remoteTable = (tableName, databaseName_source, datasourceName,
             }
         })
     })
+};
+
+export var openApi = (databaseName, wsName) => {
+    var link = ''+protocol_denodo+'://'+ip+':'+port_denodo+'/swagger-ui/index.html?url='+protocol_denodo+'://'+ip+':'+port_denodo+'/server/'+databaseName+'/'+wsName+'/OpenAPIv3/openapi.json'
+    return link;
 };
