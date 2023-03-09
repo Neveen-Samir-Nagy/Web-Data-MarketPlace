@@ -24,6 +24,7 @@ import LibraryAddIcon from "@mui/icons-material/LibraryAdd";
 import StorageIcon from "@mui/icons-material/Storage";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import { Link } from "react-router-dom";
+import  secureLocalStorage  from  "react-secure-storage";
 import Login from "./login";
 const drawerWidth = 300;
 
@@ -121,7 +122,7 @@ export default function MiniDrawer(props) {
     setAnchorEl(null);
   };
 
-  if (localStorage.getItem("login") !== "true") {
+  if (secureLocalStorage.getItem("login") !== true) {
     window.location.replace("/");
   }
   return (
@@ -142,6 +143,8 @@ export default function MiniDrawer(props) {
               alignItems: "center",
             }}
           >
+                    {secureLocalStorage.getItem("Guest") === 'yes'?
+null:
             <IconButton
               size="large"
               edge="start"
@@ -151,12 +154,13 @@ export default function MiniDrawer(props) {
               sx={{ ...(open && { display: "none" }) }}
             >
               <MenuIcon />
-            </IconButton>
+            </IconButton>}
             <Typography
               variant="h6"
-              onClick={() => {
-                window.location.replace("/products");
-              }}
+             component={secureLocalStorage.getItem("Guest") === 'yes'?
+null:             Link}
+                to=        {secureLocalStorage.getItem("Guest") === 'yes'?
+null:                "/products"}
               noWrap
               sx={{
                 padding: 0,
@@ -196,12 +200,17 @@ export default function MiniDrawer(props) {
               open={Boolean(anchorEl)}
               onClose={handleClose}
             >
-                <Typography sx={{padding:'6px 12px'}}>{localStorage.getItem("user")}</Typography>
-              <Divider />
-              <MenuItem
+                       {secureLocalStorage.getItem("Guest") === 'yes'?
+null
+:                <Typography sx={{padding:'6px 12px'}}>{secureLocalStorage.getItem("user")}</Typography>
+            }
+                    {secureLocalStorage.getItem("Guest") === 'yes'?
+null:
+                <Divider />
+                   }
+                            <MenuItem
                 onClick={() => {
-                  localStorage.removeItem("login");
-                  localStorage.removeItem("user");
+                  secureLocalStorage.clear();
                   window.location.replace("/");
                 }}
               >
@@ -211,7 +220,8 @@ export default function MiniDrawer(props) {
           </div>
         </Toolbar>
       </AppBar>
-
+      {secureLocalStorage.getItem("Guest") === 'yes'?
+null:
       <Drawer variant="permanent" open={open}>
         <DrawerHeader>
           <IconButton onClick={handleDrawerClose}>
@@ -273,7 +283,7 @@ export default function MiniDrawer(props) {
             </Tooltip>
           ))}
         </List>
-      </Drawer>
+      </Drawer>}
       <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
         <DrawerHeader />
         <main>{children}</main>

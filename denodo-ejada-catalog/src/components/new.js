@@ -42,12 +42,13 @@ import { TransitionProps } from '@mui/material/transitions';
 import { useEffect, useState } from "react";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
+import secureLocalStorage from "react-secure-storage";
 
 function New() {
   const [wsNew, setWsNew] = useState([]);
 
   const [open, setOpen] = useState(false);
- 
+
   const [serviceName, setServiceName] = useState('');
 
   const [DB, setDB] = useState('');
@@ -57,15 +58,24 @@ function New() {
   const [viewsCategories, setViewsCategories] = useState([]);
   const [wsType, setWsType] = useState('');
   const [loadingData, setLoadingData] = useState(false);
+  const [remove, setRemove] = useState(false);
 
 
   useEffect(() => {
-    axios.get('http://localhost:3000/webcontainer_services/' + localStorage.getItem("user"))
-      .then((res) => { setWsNew(res.data) })
-      .catch((error) => {
-        console.log(error);
-      });
-  }, [])
+    secureLocalStorage.getItem("products") ?
+      setWsNew(secureLocalStorage.getItem("products"))
+      :
+      axios
+        .get(
+          "http://localhost:3000/webcontainer_services/" + secureLocalStorage.getItem("user") + ""
+        )
+        .then((response) => {
+          setWsNew(response.data);
+          secureLocalStorage.setItem("products", response.data)
+          console.log('here')
+
+        })
+  }, [remove])
 
   // const Transition = React.forwardRef(function Transition(
   //   props: TransitionProps & {
@@ -81,44 +91,27 @@ function New() {
     setDB(wsNew[key].database_name)
     setOpen(true);
 
-    {console.log(serviceName)}
-
-    var arr_schema = [];
-    arr_schema.push(['Name', 'Type', 'Input', 'Output']);
-      axios.get('http://localhost:3000/ws-details/' + wsNew[key].database_name + '/' + wsNew[key].service_name)
-          .then((res) => {
-              Object.keys(JSON.parse(res.data)["schema"]).forEach(function(key) {
-                  JSON.parse(res.data)["schema"][key].map((item) => {arr_schema.push([String(item.name), String(item.type), String(item.input), String(item.output)])});
-                  console.log(JSON.parse(res.data)["schema"][key]);
-                });
-                setViewsMetaSchema(arr_schema);
-              //setViewsMetaSchema(JSON.parse(res.data)["schema"][0])
-              setViewsTags(
-                  JSON.parse(res.data)["tags"].map((item) => item.name)
-              );
-              console.log(viewsMetaSchema);
-
-              setViewsCategories(
-                  JSON.parse(res.data)["categories"].map((item) => item.name)
-              );
-              setWsType(JSON.parse(res.data)["wsType"]);
-              //setLoadingData(false);
-              setLoadingData(true);
-          })
-          .catch((error) => {
-              console.log(error);
-          });
+    { console.log(serviceName) }
   };
 
   const handleNewRequest = (key) => {
-    axios.get('http://localhost:3000/access-privilege/' + wsNew[key].database_name + '/' + wsNew[key].service_name + '/' + wsNew[key].service_name + '/' + localStorage.getItem("user"))
-          .then((res) => {
-              console.log(res.data);
+    axios.get('http://localhost:3000/ws-viewName/'+wsNew[key].database_name+'/'+wsNew[key].service_name)
+      .then((res) => {
+        axios.get('http://localhost:3000/access-privilege/' + wsNew[key].database_name + '/' + res.data + '/' + wsNew[key].service_name + '/' + secureLocalStorage.getItem("user"))
+          .then((res1) => {
+            secureLocalStorage.removeItem("products");
+            setRemove(!remove)
+            console.log(secureLocalStorage.getItem("products"))
+            console.log(res1.data);
           })
           .catch((error) => {
-              console.log(error);
+            console.log(error);
           });
-          window.location.reload(true);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+
   }
 
 
@@ -139,40 +132,45 @@ function New() {
           }}
         >
           {wsNew.map((item, key) => (!item.subscripe ?
-          <Box>
-            <Card
-              sx={{
-                width: 250,
-                maxWidth: 250,
-                marginTop: "15px",
-                marginRight: "20px",
-              }}
-            >
-              <CardHeader title={item.service_name} subheader={item.service_type} />
-
-              <CardContent>
-                <Typography variant="body2" color="text.secondary">
-
-                  {item.description}
-                </Typography>
-              </CardContent>
-              <Divider />
-              <CardActions
-                sx={{ display: "flex", justifyContent: "end" }}
-                disableSpacing
+            <Box>
+              <Card
+                sx={{
+                  width: 250,
+                  maxWidth: 250,
+                  marginTop: "15px",
+                  marginRight: "20px",
+                }}
               >
-                <IconButton>
-                  <AddShoppingCartIcon onClick={()=>handleNewRequest(key)}/>
-                </IconButton>
-                <IconButton>
-                  <InfoIcon onClick={()=>handleClickOpen(key)} />
-                  
-                </IconButton>
-              </CardActions>
-            </Card>
-            <Metadata open={open} DB={DB} name={serviceName} setOpen={setOpen} viewsCategories={viewsCategories}
-              viewsTags={viewsTags} viewsMetaSchema={viewsMetaSchema} loadingData={loadingData} wsType={wsType}/>
-                  </Box>
+                <CardHeader  sx={{
+                      '.css-1qvr50w-MuiTypography-root':{
+                        maxWidth:'85%',
+                        textOverflow:'ellipsis',
+                        overflow:'hidden',
+                        whiteSpace:'nowrap'
+                      }
+                    }} title={item.service_name} subheader={item.service_type} />
+
+                <CardContent>
+                  <Typography variant="body2" color="text.secondary">
+                  Product Description
+                  </Typography>
+                </CardContent>
+                <Divider />
+                <CardActions
+                  sx={{ display: "flex", justifyContent: "end" }}
+                  disableSpacing
+                >
+                  <IconButton>
+                    <AddShoppingCartIcon onClick={() => handleNewRequest(key)} />
+                  </IconButton>
+                  <IconButton>
+                    <InfoIcon onClick={() => handleClickOpen(key)} />
+
+                  </IconButton>
+                </CardActions>
+              </Card>
+              {open && <Metadata open={open} DB={DB} name={serviceName} setOpen={setOpen} />}
+            </Box>
             :
             <h1></h1>))}
         </Box>

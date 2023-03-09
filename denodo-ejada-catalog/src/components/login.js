@@ -1,39 +1,71 @@
-import { Avatar, Button, InputAdornment, TextField } from "@mui/material";
+import {
+  Avatar,
+  Button,
+  InputAdornment,
+  InputLabel,
+  TextField,
+} from "@mui/material";
 import { Box } from "@mui/system";
 import axios from "axios";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import KeyIcon from "@mui/icons-material/Key";
+import secureLocalStorage from "react-secure-storage";
+import CircularProgress from "@mui/material/CircularProgress";
+
 function LOGIN() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [failed, setfailed] = useState(false);
+  const [Load, setLoad] = useState(false);
+
+  useEffect( () => {
+    axios.get("http://localhost:3000/sync")
+      .then((response) => {console.log(response.data)}) 
+      .catch((error) => { console.log(error);}); 
+  },[]);
+
   const handleclick = (e) => {
     e.preventDefault();
+    setLoad(true);
     axios
       .get(
-        "http://localhost:3000/connect-denodo/" + username + "/" + password + "/admin"
+        "http://localhost:3000/connect-denodo/" +
+        username +
+        "/" +
+        password +
+        "/admin"
       )
       .then((response) => {
-        localStorage.setItem("login", response.data);
+        secureLocalStorage.setItem("login", response.data);
+
         if (response.data) {
-          axios
-            .get(
-              "http://localhost:3000/connect-denodo/admin/admin/admin"
-            )
+          axios.get("http://localhost:3000/connect-denodo/admin/admin/admin");
         }
         setfailed(false);
       })
       .then(() =>
-        localStorage.getItem("login") === "true"
-          ? (localStorage.setItem("user", username),
-            window.location.replace("/products"))
-          : setfailed(true)
-
+        secureLocalStorage.getItem("login") === true
+          ? (secureLocalStorage.setItem("user", username),
+            window.location.replace("/products"),
+            setLoad(false))
+          : (setfailed(true), setLoad(false))
       )
       .catch((error) => {
         console.log(error);
+        setLoad(false);
       });
   };
+  const handleGuestLogin = (e) => { 
+    e.preventDefault();
+     setLoad(true);
+      axios.get("http://localhost:3000/connect-denodo/admin/admin/admin")
+      .then((response) => { secureLocalStorage.setItem("login", response.data); 
+      secureLocalStorage.setItem("user", 'admin'); 
+      secureLocalStorage.setItem("Guest", 'yes'); 
+      window.location.replace("/home") })
+      .then(() => { setLoad(false) })
+      .catch((error) => { console.log(error); setLoad(false); }); 
+    }
   return (
     <Box
       sx={{
@@ -45,24 +77,47 @@ function LOGIN() {
       }}
     >
       <Box
+        display="flex"
+        flexDirection="column"
+        alignItems="flex-start"
+        sx={{
+          position: "absolute",
+          transform: "translate(-50%,-50%)",
+          top: "15%",
+          right: "40%",
+        }}
+        justifyContent="space-between"
+      >
+        <h1
+          style={{
+            color: "#fff",
+            marginBottom: "0",
+          }}
+        >
+          <span style={{ fontWeight: '700', color: 'rgb(43 43 43)' }}>
+            Market</span>
+          <span style={{ fontWeight: '300' }}>
+            Place</span>{" "}
+        </h1>
+
+      </Box>
+      <Box
         sx={{
           left: "50%",
-          transform: "translate(-50%,50%)",
-          padding: "0 30px 0 30px",
+          top: "25%",
+          transform: "translate(-50%,0)",
+          padding: "30px 40px 0 40px",
           height: "50%",
+          background: "#fff",
           borderRadius: "10px",
           position: "absolute",
+          boxShadow:
+            " 0px 0px 10px 2px rgb(82 73 73)",
         }}
       >
-        <Avatar
-          sx={{
-            margin: "auto",
-            background: "#d8c1ae",
-            width: "60px",
-            height: "60px",
-          }}
-        />
-
+        <h2 style={{ margin: '0', color: '#828282' }}>
+          Login
+        </h2>
         <form
           style={{
             height: "100%",
@@ -70,6 +125,7 @@ function LOGIN() {
           }}
           onSubmit={handleclick}
         >
+
           <Box
             display="flex"
             flexDirection="column"
@@ -77,70 +133,109 @@ function LOGIN() {
             style={{ height: "92%" }}
             justifyContent="space-evenly"
           >
-            <TextField
-              fullWidth
-              onChange={(e) => {
-                setUsername(e.target.value);
-              }}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <Avatar
-                      sx={{
-                        background: "transparent",
-                        color: "#2e2524",
-                        width: "fit-content",
-                      }}
-                    />
-                  </InputAdornment>
-                ),
-              }}
-              type="text"
-              sx={{
-                background: "#d8c1ae",
-                borderRadius: 0,
-                ".css-9ddj71-MuiInputBase-root-MuiOutlinedInput-root": {
-                  borderRadius: 0,
-                },
-              }}
-            />
-            <TextField
-              fullWidth
-              onChange={(e) => {
-                setPassword(e.target.value);
-              }}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <KeyIcon
-                      sx={{
-                        background: "transparent",
-                      }}
-                    />
-                  </InputAdornment>
-                ),
-              }}
-              type="password"
-              sx={{
-                background: "#d8c1ae",
-                borderRadius: 0,
-                ".css-9ddj71-MuiInputBase-root-MuiOutlinedInput-root": {
-                  borderRadius: 0,
-                },
-              }}
-            />
+            <Box
+              display="flex"
+              flexDirection="column"
+              alignItems="flex-start"
 
-            <Button
-              variant="contained"
-              sx={{
-                background: "#d8c1ae",
-                boxShadow: "11px 6px -2px #04C",
-                color: "#2e2524",
-              }}
-              type="submit"
+              justifyContent="space-between"
             >
-              Login
-            </Button>
+              <TextField
+                fullWidth
+                variant="outlined"
+                id="outlined-basic"
+                label="Username"
+                onChange={(e) => {
+                  setUsername(e.target.value);
+                }}
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="start">
+
+                      <Avatar
+                        sx={{
+                          background: "transparent",
+                          color: "#2e2524",
+                          width: "fit-content",
+                        }}
+                      />
+                    </InputAdornment>
+                  ),
+                }}
+                type="text"
+                sx={{
+                  background: "#fff",
+
+                }}
+              /></Box>
+            <Box
+              display="flex"
+              flexDirection="column"
+              alignItems="flex-start"
+
+
+              justifyContent="space-between"
+            >
+
+              <TextField
+                fullWidth
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                }}
+                variant="outlined"
+                id="outlined-basic"
+                label="Password"
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="start">
+                      <KeyIcon
+                        sx={{
+                          background: "transparent",
+                        }}
+                      />
+                    </InputAdornment>
+                  ),
+                }}
+                type="password"
+                sx={{
+                  background: "#fff",
+
+                }}
+              />
+            </Box>
+
+
+            <Box
+              sx={{
+                display: "flex",
+                width: "100%",
+                justifyContent: "space-evenly",
+                alignItems: "center",
+              }}
+            >
+              <Button
+                variant="contained"
+                sx={{
+                  boxShadow: "11px 6px -2px #04C",
+                  color: "#fff",
+                }}
+                type="submit"
+                disabled={Load}
+              >
+                {Load ? "logging in..." : "Login"}
+              </Button>
+              <Button
+              onClick={handleGuestLogin}
+                variant="contained"
+                sx={{
+                  boxShadow: "11px 6px -2px #04C",
+                  color: "#fff",
+                }}
+                disabled={Load}
+              >
+                Guest
+              </Button>
+            </Box>
 
             {failed && (
               <div

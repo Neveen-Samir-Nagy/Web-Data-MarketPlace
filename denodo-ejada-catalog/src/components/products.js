@@ -1,71 +1,71 @@
-import { styled } from "@mui/material/styles";
 import Card from "@mui/material/Card";
 import CardHeader from "@mui/material/CardHeader";
-import CardMedia from "@mui/material/CardMedia";
 import CardContent from "@mui/material/CardContent";
 import CardActions from "@mui/material/CardActions";
-import Collapse from "@mui/material/Collapse";
-import Avatar from "@mui/material/Avatar";
+
 import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
-import { red } from "@mui/material/colors";
-import FavoriteIcon from "@mui/icons-material/Favorite";
-import ShareIcon from "@mui/icons-material/Share";
+import excel from "exceljs";
+import { saveAs } from "file-saver";
 import LaunchIcon from "@mui/icons-material/Launch";
 import InfoIcon from "@mui/icons-material/Info";
-import ControlPoint from "@mui/icons-material/ControlPoint";
-import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
 import Navbar from "./Navbar";
 import Metadata from "./metadata";
 import DownloadIcon from '@mui/icons-material/Download';
 import { Box } from "@mui/system";
 import axios from "axios";
-import excel from "exceljs";
-import { saveAs } from "file-saver";
 import { useEffect, useState } from "react";
-import MoreVertIcon from '@mui/icons-material/MoreVert';
-import UnfoldMoreIcon from '@mui/icons-material/UnfoldMore';
-
-import { Button, Container, Divider } from "@mui/material";
+import secureLocalStorage from "react-secure-storage";
+import Remote from './Remote';
+import MoreDetails from './MoreDetails';
+import { Button, Dialog, DialogActions, DialogContent, Divider, Menu, MenuItem, Portal } from "@mui/material";
 import { Link } from "react-router-dom";
+import CircularProgress from '@mui/material/CircularProgress';
+
 function Products() {
   const [purchasedWs, setPurchasedWs] = useState([]);
   const [open, setOpen] = useState(false);
+  const [openDownload, setOpenDownload] = useState();
+  const [openRemote, setOpenRemote] = useState(false);
+  const [OpenDetails, setOpenDetails] = useState(false);
 
   const [serviceName, setServiceName] = useState('');
+  const [viewName, setViewName] = useState('');
+  const [wsType, setWsType] = useState('');
+  const [anchorEl, setAnchorEl] = useState(null);
 
   const [DB, setDB] = useState('');
+  const [context, setContext] = useState('');
+  const [ipDenodo, setIpDenodo] = useState("");
+  const [port, setPort] = useState("");
+  const [LoadExcel, setLoadExcel] = useState(false);
+  const [openExcel, setOpenExcel] = useState(false);
 
-  const [viewsMetaSchema, setViewsMetaSchema] = useState([]);
-  const [viewsTags, setViewsTags] = useState([]);
-  const [viewsCategories, setViewsCategories] = useState([]);
-  const [wsType, setWsType] = useState('');
-  const [loadingData, setLoadingData] = useState(false);
-  var ip = 'localhost';
-  var port_denodo = '9090';
-  var protocol_denodo = 'http';
-
-  console.log('products');
   useEffect(() => {
-    axios
-      .get(
-        "http://localhost:3000/webcontainer_services/" + localStorage.getItem("user") + ""
-      )
-      .then((response) => {
-        setPurchasedWs(response.data);
-        console.log(response.data);
-      })
-  }, [])
+    secureLocalStorage.getItem("products") ?
+      setPurchasedWs(secureLocalStorage.getItem("products"))
+      :
+      axios
+        .get(
+          "http://localhost:3000/webcontainer_services/" + secureLocalStorage.getItem("user") + ""
+        )
+        .then((response) => {
+          setPurchasedWs(response.data);
+          secureLocalStorage.setItem("products", response.data)
+          console.log('here')
 
+        })
+  }, [])
   const handleDownload = async (key) => {
-    await axios.get('http://localhost:3000/download-excel/' + purchasedWs[key].database_name + '/' + purchasedWs[key].service_name + '/' + purchasedWs[key].service_name)
+    setLoadExcel(true)
+    setOpenExcel(true)
+    await axios.get('http://localhost:3000/download-excel/' + key.database_name + '/' + key.service_name + '/' + key.service_name)
       .then((res) => {
-        download(res.data, String(purchasedWs[key].service_name));
+        download(res.data, String(key.service_name));
       })
       .catch((e) => { console.log(e.message) })
 
   }
-
   const download = (objs, name) => {
     var workbook = new excel.Workbook();
     var worksheet = workbook.addWorksheet("Tutorials");
@@ -85,7 +85,7 @@ function Products() {
     });
 
     try {
-      saveFile(name+'_data.xlsx', workbook)
+      saveFile(name + '_data.xlsx', workbook)
 
       async function saveFile(fileName, workbook) {
         const xls64 = await workbook.xlsx.writeBuffer({ base64: true })
@@ -94,56 +94,83 @@ function Products() {
           fileName
         )
       }
+      setOpenExcel(true)
+      setLoadExcel(false)
     } catch (err) {
       console.log(err);
     }
   };
-
   const handleClickOpen = (key) => {
-    setServiceName(purchasedWs[key].service_name)
-    setDB(purchasedWs[key].database_name)
+    console.log(key)
+
+    setServiceName(key.service_name)
+    setDB(key.database_name)
     setOpen(true);
-
-    { console.log(purchasedWs[key].service_name) }
-    //setViewsMetaSchema([]);
-    var arr_schema = [];
-    arr_schema.push(['Name', 'Type', 'Input', 'Output'])
-    axios.get('http://localhost:3000/ws-details/' + purchasedWs[key].database_name + '/' + purchasedWs[key].service_name)
-      .then((res) => {
-        Object.keys(JSON.parse(res.data)["schema"]).forEach(function (key) {
-          JSON.parse(res.data)["schema"][key].map((item) => { arr_schema.push([String(item.name), String(item.type), String(item.input), String(item.output)]); });
-        });
-        setViewsMetaSchema(arr_schema);
-        //setViewsMetaSchema(JSON.parse(res.data)["schema"][0])
-        setViewsTags(
-          JSON.parse(res.data)["tags"].map((item) => item.name)
-        );
-        console.log(viewsMetaSchema);
-
-        setViewsCategories(
-          JSON.parse(res.data)["categories"].map((item) => item.name)
-        );
-        setWsType(JSON.parse(res.data)["wsType"]);
-        //setLoadingData(false);
-        setLoadingData(true);
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+    console.log(key.service_name)
+    console.log(key.database_name)
 
   };
+  const handleRedirect = (key) => {
+    console.log(key)
+    console.log(key.context)
+    setServiceName(key.service_name)
+    setDB(key.database_name)
+    setContext(key.context)
+  };
+  const handleClose = () => {
+    setAnchorEl(null)
+    setOpenDownload(false)
+  };
+  const handleOpenRemote = (key) => {
 
-  const handleClickApi = (key) => {
-    window.open(''+protocol_denodo+'://'+ip+':'+port_denodo + purchasedWs[key].context);
-  }
+    setContext(key.context)
+    setServiceName(key.service_name)
+    setDB(key.database_name)
+    setOpenRemote(true)
+    handleClose();
+    console.log(openRemote)
+  };
+  const handleCloseDetails = () => {
+    setAnchorEl(null)
+    setOpenDetails(false)
+  };
+  const handleOpenDownload = (event, key) => {
+    setOpenDownload(key);
+    setAnchorEl(event.currentTarget);
 
-  const handleMoreDetails = (key) => {
-    axios.get('http://localhost:3000/more-details/' + purchasedWs[key].database_name + '/' + purchasedWs[key].service_name)
-      .then((res) => {
-        window.open(res.data);
+    console.log(purchasedWs[key].database_name,purchasedWs[key].service_name)
+    axios.get(
+      `http://localhost:3000/ws-viewName/${purchasedWs[key].database_name}/${purchasedWs[key].service_name}`
+    )
+      .then((response) => {
+        setViewName(response.data);
       })
-      .catch((e) => { console.log(e.message) })
-  }
+  };
+  const handleOpenDetails = (key) => {
+    axios.get(
+      "http://localhost:3000/connection-details"
+    )
+      .then((response) => {
+        setIpDenodo(response.data[0]['server_ip'])
+        setPort(response.data[0]['port'])
+      })
+      setWsType(key.service_type);
+
+    setServiceName(key.service_name)
+    setDB(key.database_name)
+    setContext(key.context)
+    console.log(key)
+    console.log(key.service_name)
+
+    console.log(key.context)
+    console.log(context)
+    setOpenDetails(true)
+    handleClose();
+    console.log(openRemote)
+  };
+  const handleCloseRemote = () => {
+    setOpenRemote(false)
+  };
 
   return (
     <Navbar>
@@ -163,8 +190,8 @@ function Products() {
             <Box>
               <Card
                 sx={{
-                  width: 250,
-                  maxWidth: 250,
+                  width: 300,
+                  maxWidth: 300,
                   marginTop: "15px",
                   marginRight: "20px",
                 }}
@@ -172,11 +199,19 @@ function Products() {
                 <CardHeader
                   title={item.service_name}
                   subheader={item.service_type}
+                  sx={{
+                    '.css-1qvr50w-MuiTypography-root':{
+                      maxWidth:'85%',
+                      textOverflow:'ellipsis',
+                      overflow:'hidden',
+                      whiteSpace:'nowrap'
+                    }
+                  }}
                 />
 
                 <CardContent>
-                  <Typography variant="body2" color="text.secondary">
-                    {item.description}
+                  <Typography  variant="body2" color="text.secondary">
+                  Product Description
                   </Typography>
                 </CardContent>
                 <Divider />
@@ -185,20 +220,52 @@ function Products() {
                   sx={{ display: "flex", justifyContent: "end" }}
                   disableSpacing
                 >
-                  <IconButton onClick={() => handleClickApi(key)}>
+                  <IconButton onClick={() => handleRedirect(item)} href={'http://localhost:9090' + context} target="_blank" >
                     <LaunchIcon />
                   </IconButton>
                   <IconButton>
-                    <InfoIcon onClick={() => handleClickOpen(key)} />
+                    <InfoIcon onClick={() => handleClickOpen(item)} />
                   </IconButton>
-                    {purchasedWs[key].service_type == 'REST' ? <IconButton><DownloadIcon onClick={() => handleDownload(key)} />  </IconButton> : <></>} 
-                    {purchasedWs[key].service_type == 'REST' ? <IconButton><UnfoldMoreIcon onClick={() => handleMoreDetails(key)} />  </IconButton> : <></>} 
-                </CardActions>
+                  <IconButton
+                    onClick={(event) => handleOpenDownload(event, key)} >
+                    <DownloadIcon />
+                  </IconButton>
+                  
+                  {item.service_type==='SOAP'? <Menu
+                    open={openDownload === key}
+                    anchorEl={anchorEl}
+                    onClose={handleClose}
+                  >
+                    <MenuItem onClick={() => {console.log(item); handleOpenDetails(item)}}>More Connection Details</MenuItem>
+                  </Menu> : 
+                  <Menu
+                    open={openDownload === key}
+                    anchorEl={anchorEl}
+                    onClose={handleClose}
+                  >
+                    <MenuItem onClick={() => handleDownload(item)}>Excel</MenuItem>
+                    <MenuItem onClick={() => handleOpenRemote(item)} >External Database</MenuItem>
+
+                    <MenuItem onClick={() => {console.log(item); handleOpenDetails(item)}}>More Connection Details</MenuItem>
+                  </Menu>}
+                  </CardActions>
+
               </Card>
-              <Metadata open={open} DB={DB} name={serviceName} setOpen={setOpen} viewsCategories={viewsCategories}
-                viewsTags={viewsTags} viewsMetaSchema={viewsMetaSchema} loadingData={loadingData} wsType={wsType} />
+              <Dialog open={openExcel}>
+                <DialogContent sx={{ width: '100%', textAlign: 'center' }}>
+                  {LoadExcel ? <CircularProgress /> : 'Downloaded Successfully'}       </DialogContent>
+                <DialogActions>
+                  <Button disabled={LoadExcel} onClick={() => setOpenExcel(false)}>
+                    Ok
+                  </Button>
+                </DialogActions>
+              </Dialog>
+              {open && <Metadata open={open} DB={DB} name={serviceName} setOpen={setOpen} />}
+              {openRemote && <Remote viewName={viewName} DB={DB} wsName={serviceName} close={handleCloseRemote} open={openRemote} />}
+              {OpenDetails && <MoreDetails wsType={wsType} viewName={viewName} DB={DB} wsName={serviceName} close={handleCloseDetails} context={context} open={OpenDetails} ipDenodo={ipDenodo} port={port} />}
             </Box>
-            : <></>))}
+            :
+            <h1></h1>))}
         </Box>
       </Box>
     </Navbar>

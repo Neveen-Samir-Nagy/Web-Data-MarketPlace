@@ -16,6 +16,7 @@
     "express": "^4.18.2",
     "file-saver": "^2.0.5",
     "jdbc": "^0.7.6",
+    "postman-request": "^2.88.1-postman.32",
     "request": "^2.88.2"
   }
 }
