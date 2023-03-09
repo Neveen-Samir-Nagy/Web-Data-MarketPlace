@@ -1,4 +1,4 @@
-import { sync_vdp_datacatalog, connect_denodo, create_api, get_ws_url, ws_details, sample_data, views, view_columns, view_details, catalog_permissions, webcontainer_services, webservices, create_datasource, create_remoteTable, access_privilege, redploy_ws, sample_data_from_ws, sample_data_link_ws, openApi, connection_details, sample_data_link_ws_pm, create_user, tages } from './index.js';
+import { sync_vdp_datacatalog, connect_denodo, create_api, get_ws_url, ws_details, sample_data, views, view_columns, view_details, catalog_permissions, webcontainer_services, webservices, create_datasource, create_remoteTable, access_privilege, redploy_ws, sample_data_from_ws, sample_data_link_ws, openApi, connection_details, sample_data_link_ws_pm, create_user, tages, list_users, list_roles, map_users_ws } from './index.js';
 import express from 'express';
 import cors from 'cors';
 import bp from 'body-parser';
@@ -190,6 +190,30 @@ app.get('/ws-viewName/:databaseName/:wsName', (req, res) => {
         console.log(String(req.params.databaseName), String(req.params.wsName))
         console.log(Object.keys(JSON.parse(results).schema)[0]);
         res.send(Object.keys(JSON.parse(results).schema)[0]);
+    }
+    );
+});
+
+app.get('/list-users', (req, res) => {
+    const users = list_users().then(function (results) {
+        console.log(results);
+        res.send(results);
+    }
+    );
+});
+
+app.get('/list-roles', (req, res) => {
+    const users = list_roles().then(function (results) {
+        console.log(results);
+        res.send(results);
+    }
+    );
+});
+
+app.get('/map-users-ws', (req, res) => {
+    const users = map_users_ws().then(function (results) {
+        console.log(results);
+        res.send(results);
     }
     );
 });
