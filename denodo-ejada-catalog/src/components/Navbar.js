@@ -143,7 +143,7 @@ export default function MiniDrawer(props) {
               alignItems: "center",
             }}
           >
-                    {secureLocalStorage.getItem("Guest") === 'yes'?
+                     {(secureLocalStorage.getItem("user") === 'admin'||secureLocalStorage.getItem("admin") === 'yes')?
 null:
             <IconButton
               size="large"
@@ -157,16 +157,16 @@ null:
             </IconButton>}
             <Typography
               variant="h6"
-             component={secureLocalStorage.getItem("Guest") === 'yes'?
+             component= {(secureLocalStorage.getItem("user") === 'admin'||secureLocalStorage.getItem("admin") === 'yes')?
 null:             Link}
-                to=        {secureLocalStorage.getItem("Guest") === 'yes'?
+                to=         {(secureLocalStorage.getItem("user") === 'admin'||secureLocalStorage.getItem("admin") === 'yes')?
 null:                "/products"}
               noWrap
               sx={{
                 padding: 0,
                 color: "#fff",
                 textDecoration: "none",
-                cursor: "pointer",
+                cursor:((secureLocalStorage.getItem("user") === 'admin'||secureLocalStorage.getItem("admin") === 'yes')?"context-menu":"pointer"),
                 ml: 2,
               }}
             >
@@ -204,7 +204,7 @@ null:                "/products"}
 null
 :                <Typography sx={{padding:'6px 12px'}}>{secureLocalStorage.getItem("user")}</Typography>
             }
-                    {secureLocalStorage.getItem("Guest") === 'yes'?
+                      {(secureLocalStorage.getItem("user") === 'admin'||secureLocalStorage.getItem("admin") === 'yes')?
 null:
                 <Divider />
                    }
@@ -220,7 +220,7 @@ null:
           </div>
         </Toolbar>
       </AppBar>
-      {secureLocalStorage.getItem("Guest") === 'yes'?
+      {(secureLocalStorage.getItem("user") === 'admin'||secureLocalStorage.getItem("admin") === 'yes')?
 null:
       <Drawer variant="permanent" open={open}>
         <DrawerHeader>

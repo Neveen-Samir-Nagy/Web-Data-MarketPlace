@@ -1,4 +1,4 @@
-import { sync_vdp_datacatalog, connect_denodo, create_api, get_ws_url, ws_details, sample_data, views, view_columns, view_details, catalog_permissions, webcontainer_services, webservices, create_datasource, create_remoteTable, access_privilege, redploy_ws, sample_data_from_ws, sample_data_link_ws, openApi, connection_details, sample_data_link_ws_pm, create_user, tages, list_users, list_roles, map_users_ws } from './index.js';
+import { sync_vdp_datacatalog, connect_denodo, create_api, get_ws_url, ws_details, sample_data, views, view_columns, view_details, catalog_permissions, webcontainer_services, webservices, create_datasource, create_remoteTable, access_privilege, redploy_ws, sample_data_from_ws, sample_data_link_ws, openApi, connection_details, sample_data_link_ws_pm, create_user, tages, list_users, list_roles, map_users_ws, revoke_user } from './index.js';
 import express from 'express';
 import cors from 'cors';
 import bp from 'body-parser';
@@ -195,6 +195,7 @@ app.get('/ws-viewName/:databaseName/:wsName', (req, res) => {
 });
 
 app.get('/list-users', (req, res) => {
+    connect_denodo('admin', password_admin, 'admin')
     const users = list_users().then(function (results) {
         console.log(results);
         res.send(results);
@@ -203,6 +204,7 @@ app.get('/list-users', (req, res) => {
 });
 
 app.get('/list-roles', (req, res) => {
+    connect_denodo('admin', password_admin, 'admin')
     const users = list_roles().then(function (results) {
         console.log(results);
         res.send(results);
@@ -211,9 +213,18 @@ app.get('/list-roles', (req, res) => {
 });
 
 app.get('/map-users-ws', (req, res) => {
+    connect_denodo('admin', password_admin, 'admin')
     const users = map_users_ws().then(function (results) {
         console.log(results);
         res.send(results);
+    }
+    );
+});
+
+app.get('/revoke-user/:databaseName/:wsName/:userName', (req, res) => {
+    connect_denodo('admin', password_admin, 'admin')
+    const users = revoke_user(String(req.params.userName), String(req.params.databaseName), String(req.params.wsName)).then(function (results) {
+        res.send("Done");
     }
     );
 });

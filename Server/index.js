@@ -913,7 +913,6 @@ export var list_users = () => {
                                         console.log(err);
                                     } else {
                                         //Execute a query
-                                        connect_denodo('admin', password_admin, 'admin')
                                         statement.executeQuery("LIST USERS;",
                                         function (err, resultset) {
                                             if (err) {
@@ -964,7 +963,6 @@ export var list_roles = () => {
                                         console.log(err);
                                     } else {
                                         //Execute a query
-                                        connect_denodo('admin', password_admin, 'admin')
                                         statement.executeQuery("LIST ROLES;",
                                         function (err, resultset) {
                                             if (err) {
@@ -1015,7 +1013,6 @@ export var map_users_ws = () => {
                                         console.log(err);
                                     } else {
                                         //Execute a query
-                                        connect_denodo('admin', password_admin, 'admin')
                                         statement.executeQuery("SELECT elementname, list(username) FROM catalog_permissions(null,null) where elementtype='Web service' group by elementname;",
                                         function (err, resultset) {
                                             if (err) {
@@ -1036,6 +1033,38 @@ export var map_users_ws = () => {
                                                 );
                                             }
                                         }
+                                        );
+                                    }
+                                });
+                            }
+                        });
+                    }
+                ]);
+            }
+        })
+    })
+};
+
+export var revoke_user = (username, databaseName, wsName) => {
+    return new Promise((resolve, reject) => {
+        denododb.reserve(function (err, connObj) {
+            if (connObj) {
+                var conn = connObj.conn;
+                // Query the database.
+                asyncjs.series([
+                    function () {
+                        // Select statement example.
+                        conn.createStatement(function (err, statement) {
+                            if (err) {
+                                console.log(err);
+                            } else {
+                                statement.setFetchSize(100, function (err) {
+                                    if (err) {
+                                        console.log(err);
+                                    } else {
+                                        //Execute a query
+                                        statement.executeQuery("alter user "+username+" revoke metadata on webservice "+databaseName+"."+wsName+";",
+                                        
                                         );
                                     }
                                 });

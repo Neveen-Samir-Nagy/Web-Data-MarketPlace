@@ -18,15 +18,23 @@ function LOGIN() {
   const [failed, setfailed] = useState(false);
   const [Load, setLoad] = useState(false);
 
-  useEffect( () => {
+  useEffect(() => {
     axios.get("http://localhost:3000/sync")
-      .then((response) => {console.log(response.data)}) 
-      .catch((error) => { console.log(error);}); 
-  },[]);
+      .then((response) => { console.log(response.data) })
+      .catch((error) => { console.log(error); });
+  }, []);
 
   const handleclick = (e) => {
     e.preventDefault();
     setLoad(true);
+    if (username === 'sysadmin' && password === 'admin') {
+      setLoad(false)
+      secureLocalStorage.setItem("admin", 'yes')
+      secureLocalStorage.setItem("user", 'sysadmin')
+      secureLocalStorage.setItem("login", true)
+      window.location.replace("/admin")
+      console.log('in sysadmin')
+    } else {
     axios
       .get(
         "http://localhost:3000/connect-denodo/" +
@@ -54,18 +62,23 @@ function LOGIN() {
         console.log(error);
         setLoad(false);
       });
-  };
-  const handleGuestLogin = (e) => { 
-    e.preventDefault();
-     setLoad(true);
-      axios.get("http://localhost:3000/connect-denodo/admin/admin/admin")
-      .then((response) => { secureLocalStorage.setItem("login", response.data); 
-      secureLocalStorage.setItem("user", 'admin'); 
-      secureLocalStorage.setItem("Guest", 'yes'); 
-      window.location.replace("/home") })
-      .then(() => { setLoad(false) })
-      .catch((error) => { console.log(error); setLoad(false); }); 
     }
+  };
+  const handleGuestLogin = (e) => {
+    e.preventDefault();
+    setLoad(true);
+    
+      axios.get("http://localhost:3000/connect-denodo/admin/admin/admin")
+        .then((response) => {
+          secureLocalStorage.setItem("login", response.data);
+          secureLocalStorage.setItem("user", 'admin');
+          secureLocalStorage.setItem("Guest", 'yes');
+          window.location.replace("/home")
+        })
+        .then(() => { setLoad(false) })
+        .catch((error) => { console.log(error); setLoad(false); });
+    
+  }
   return (
     <Box
       sx={{
@@ -225,7 +238,7 @@ function LOGIN() {
                 {Load ? "logging in..." : "Login"}
               </Button>
               <Button
-              onClick={handleGuestLogin}
+                onClick={handleGuestLogin}
                 variant="contained"
                 sx={{
                   boxShadow: "11px 6px -2px #04C",
