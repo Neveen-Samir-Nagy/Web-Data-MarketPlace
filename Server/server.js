@@ -1,4 +1,4 @@
-import { sync_vdp_datacatalog, connect_denodo, create_api, get_ws_url, ws_details, sample_data, views, view_columns, view_details, catalog_permissions, webcontainer_services, webservices, create_datasource, create_remoteTable, access_privilege, redploy_ws, sample_data_from_ws, sample_data_link_ws, openApi, connection_details, sample_data_link_ws_pm, create_user, tages, list_users, list_roles, map_users_ws, revoke_user } from './index.js';
+import { sync_vdp_datacatalog, connect_denodo, create_api, get_ws_url, ws_details, sample_data, views, view_columns, view_details, catalog_permissions, webcontainer_services, webservices, create_datasource, create_remoteTable, access_privilege, redploy_ws, sample_data_from_ws, sample_data_link_ws, openApi, connection_details, sample_data_link_ws_pm, create_user, tages, list_users, list_roles, map_users_ws, revoke_user, drop_user } from './index.js';
 import express from 'express';
 import cors from 'cors';
 import bp from 'body-parser';
@@ -223,11 +223,16 @@ app.get('/map-users-ws', (req, res) => {
 
 app.get('/revoke-user/:databaseName/:wsName/:userName', (req, res) => {
     connect_denodo('admin', password_admin, 'admin')
-    const users = revoke_user(String(req.params.userName), String(req.params.databaseName), String(req.params.wsName)).then(function (results) {
+    const users = revoke_user(String(req.params.userName), String(req.params.databaseName), String(req.params.wsName));
         res.send("Done");
     }
-    );
-});
+);
 
+app.get('/drop-user/:userName', (req, res) => {
+    connect_denodo('admin', password_admin, 'admin');
+    const users = drop_user(String(req.params.userName));
+        res.send("Done");
+    }
+);
 // views(1, '//'+ip+':9999/admin', 'testdb', 50,1);
 // console.log(sample_data(denododb, 'testdb', 'bv_dev_usecase_roles'));

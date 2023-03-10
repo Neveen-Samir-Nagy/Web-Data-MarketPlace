@@ -1076,3 +1076,35 @@ export var revoke_user = (username, databaseName, wsName) => {
         })
     })
 };
+
+export var drop_user = (username) => {
+    return new Promise((resolve, reject) => {
+        denododb.reserve(function (err, connObj) {
+            if (connObj) {
+                var conn = connObj.conn;
+                // Query the database.
+                asyncjs.series([
+                    function () {
+                        // Select statement example.
+                        conn.createStatement(function (err, statement) {
+                            if (err) {
+                                console.log(err);
+                            } else {
+                                statement.setFetchSize(100, function (err) {
+                                    if (err) {
+                                        console.log(err);
+                                    } else {
+                                        //Execute a query
+                                        statement.executeQuery("DROP USER "+username+";",
+                                        
+                                        );
+                                    }
+                                });
+                            }
+                        });
+                    }
+                ]);
+            }
+        })
+    })
+};
