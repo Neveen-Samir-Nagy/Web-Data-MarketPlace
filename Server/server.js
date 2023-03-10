@@ -1,4 +1,4 @@
-import { sync_vdp_datacatalog, connect_denodo, create_api, get_ws_url, ws_details, sample_data, views, view_columns, view_details, catalog_permissions, webcontainer_services, webservices, create_datasource, create_remoteTable, access_privilege, redploy_ws, sample_data_from_ws, sample_data_link_ws, openApi, connection_details, sample_data_link_ws_pm, create_user, tages, list_users, list_roles, map_users_ws, revoke_user, drop_user } from './index.js';
+import { sync_vdp_datacatalog, categories, connect_denodo, create_api, get_ws_url, ws_details, sample_data, views, view_columns, view_details, catalog_permissions, webcontainer_services, webservices, create_datasource, create_remoteTable, access_privilege, redploy_ws, sample_data_from_ws, sample_data_link_ws, openApi, connection_details, sample_data_link_ws_pm, create_user, tags, list_users, list_roles, map_users_ws, revoke_user, drop_user, ws_of_category, ws_of_tag } from './index.js';
 import express from 'express';
 import cors from 'cors';
 import bp from 'body-parser';
@@ -50,15 +50,31 @@ app.get('/sync', (req, res) => {
 });
 
 app.get('/categories', (req, res) => {
-    const categories = categories(1, '//'+ip+':9999/admin').then(function (results) {
+    const category = categories(1, '//'+ip+':9999/admin').then(function (results) {
         //console.log(results);
         res.send(results);
     }
     );
 });
 
-app.get('/tages', (req, res) => {
-    const tages = tages(1, '//'+ip+':9999/admin').then(function (results) {
+app.get('/ws-of-category/:category_id/:limit/:offest', (req, res) => {
+    const ws_category = ws_of_category(1, '//'+ip+':9999/admin', parseInt(req.params.category_id), parseInt(req.params.limit), parseInt(req.params.offest)).then(function (results) {
+        //console.log(results);
+        res.send(results);
+    }
+    );
+});
+
+app.get('/tags', (req, res) => {
+    const tag = tags(1, '//'+ip+':9999/admin').then(function (results) {
+        //console.log(results);
+        res.send(results);
+    }
+    );
+});
+
+app.get('/ws-of-tag/:tag_id/:limit/:offest', (req, res) => {
+    const ws_tag = ws_of_tag(1, '//'+ip+':9999/admin', parseInt(req.params.tag_id), parseInt(req.params.limit), parseInt(req.params.offest)).then(function (results) {
         //console.log(results);
         res.send(results);
     }

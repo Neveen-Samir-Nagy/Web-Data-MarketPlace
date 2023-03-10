@@ -88,7 +88,25 @@ export var categories = function (serverId = 1, uri = '//' + ip + ':9999/admin')
     })
 };
 
-export var tages = function (serverId = 1, uri = '//' + ip + ':9999/admin') {
+export var ws_of_category = function (serverId = 1, uri = '//' + ip + ':9999/admin', category_id, limit = 50, offest = 0) {
+    return new Promise((resolve, reject) => {
+        request({
+            method: 'GET',
+            uri: '' + protocol_denodo + '://' + ip + ':' + port_denodo + '/denodo-data-catalog/public/api/browse/categories/'+category_id+'/elements/type/WEBSERVICES?limit='+limit+'&offset='+offest+'&serverId=' + serverId + '&uri=' + uri + '',
+            headers: { 'Authorization': 'Basic YWRtaW46YWRtaW4=', 'Content-Type': 'application/json' }
+        }, function (error, response, body) {
+            if (!error && response.statusCode == 200) {
+                //console.log(body);
+                categories = JSON.parse(body);
+                return resolve(body);
+            } else {
+                console.log(error);
+            }
+        })
+    })
+};
+
+export var tags = function (serverId = 1, uri = '//' + ip + ':9999/admin') {
     return new Promise((resolve, reject) => {
         request({
             method: 'GET',
@@ -105,7 +123,25 @@ export var tages = function (serverId = 1, uri = '//' + ip + ':9999/admin') {
     })
 };
 
-export var views = function (serverId = 1, uri = '//' + ip + ':9999/admin', databaseName, limit = 50, offest = 1) {
+export var ws_of_tag = function (serverId = 1, uri = '//' + ip + ':9999/admin', tag_id, limit = 50, offest = 0) {
+    return new Promise((resolve, reject) => {
+        request({
+            method: 'GET',
+            uri: '' + protocol_denodo + '://' + ip + ':' + port_denodo + '/denodo-data-catalog/public/api/browse/tags/'+tag_id+'/elements/type/WEBSERVICES?limit='+limit+'&offset='+offest+'&serverId=' + serverId + '&uri=' + uri + '',
+            headers: { 'Authorization': 'Basic YWRtaW46YWRtaW4=', 'Content-Type': 'application/json' }
+        }, function (error, response, body) {
+            if (!error && response.statusCode == 200) {
+                //console.log(body);
+                categories = JSON.parse(body);
+                return resolve(body);
+            } else {
+                console.log(error);
+            }
+        })
+    })
+};
+
+export var views = function (serverId = 1, uri = '//' + ip + ':9999/admin', databaseName, limit = 50, offest = 0) {
     //var id = (categories.find(x => x.name === databaseName)).id;
     return new Promise((resolve, reject) => {
         request({
