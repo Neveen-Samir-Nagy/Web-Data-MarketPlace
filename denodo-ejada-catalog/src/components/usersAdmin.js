@@ -8,44 +8,61 @@ import ImageIcon from '@mui/icons-material/Image';
 import WorkIcon from '@mui/icons-material/Work';
 import BeachAccessIcon from '@mui/icons-material/BeachAccess';
 import axios from 'axios'
-import { IconButton } from '@mui/material';
+import { Divider, IconButton } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
-
+import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined';
+import { Box } from '@mui/system';
 export default function UsersAdmin() {
     const [users, setUsers] = React.useState('');
-React.useEffect(()=>{
-    axios.get(
-        `http://localhost:3000/list-users`
-      )
-        .then((response) => {
-          setUsers(response.data.map(a => a.name))
-        })
+    const [isHovering, setIsHovering] = React.useState('');
+    const handleMouseOver = (key) => {
+        console.log('over')
+        setIsHovering(key);
+    };
 
-    },[])
- 
-    
-  return (
-    <List sx={{ width: '100%', maxWidth: 360, bgcolor: 'background.paper' }}>
-    {users && users.map((user)=>(
-   <ListItem sx={{
-    ':hover':{
-        background:'rgba(0, 0, 0, 0.12)',
-        boxShadow:'inset 0px 0px 1px 1px #00000033'
-    },
-    marginBottom:'10px'}} secondaryAction={
-    <IconButton edge="end" aria-label="delete">
-      <DeleteIcon />
-    </IconButton>
-  }>
-   <ListItemAvatar>
-     <Avatar>
+    const handleMouseOut = () => {
+        setIsHovering('');
+    };
 
-     </Avatar>
-   </ListItemAvatar>
-   <ListItemText primary={user} />
- </ListItem>
-      ))}
-   
-    </List>
-  );
+    React.useEffect(() => {
+        axios.get(
+            `http://localhost:3000/list-users`
+        )
+            .then((response) => {
+                setUsers(response.data.map(a => a.name))
+            })
+
+    }, [])
+
+
+    return (
+        <List sx={{ width: '100%', bgcolor: 'background.paper' }}>
+            {users && users.map((user, index) => (
+                <Box key={index} >
+                    <ListItem key={index} sx={{
+                        background: index % 2 != 0 ? "#FFF" : "rgba(0, 0, 0, 0.1)"
+                    }} secondaryAction={
+                        <IconButton key={index} onMouseOver={()=>handleMouseOver(index)}
+                            onMouseOut={handleMouseOut} edge="end" aria-label="delete">
+                            {isHovering ===index ? <DeleteOutlineOutlinedIcon />:<DeleteIcon /> }
+                        </IconButton>
+                    }>
+                        <ListItemAvatar>
+
+                            <Avatar>
+
+                            </Avatar>
+                        </ListItemAvatar>
+                        <ListItemText primary={user} />
+
+                    </ListItem>
+
+                    <Divider />
+
+                </Box>
+
+            ))}
+
+        </List>
+    );
 }

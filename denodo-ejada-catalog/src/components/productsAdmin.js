@@ -28,13 +28,15 @@ React.useEffect(()=>{
  
     
   return (
-    <List sx={{ width: '100%', maxWidth: 360, bgcolor: 'background.paper' }}>
-    {products && products.map((user)=>(
+    <List sx={{ width: '100%', bgcolor: 'background.paper' }}>
+    {products && products.map((user,index)=>(
    <ListItem sx={{
+
     ':hover':{
         background:'rgba(0, 0, 0, 0.12)',
         boxShadow:'inset 0px 0px 1px 1px #00000033'
     },
+    background:index % 2==0?'rgba(0, 0, 0, 0.12)':'null',
     marginBottom:'10px'}} >
    <ListItemAvatar>
      <Avatar>
@@ -43,9 +45,12 @@ React.useEffect(()=>{
      </Avatar>
    </ListItemAvatar>
    <ListItemText primary={user.elementname} />
+   <p>
+    {user.list.replace('[' , '').replace(']', '')}
+   </p>
  </ListItem>
       ))}
-   
+            
     </List>
   );
 }

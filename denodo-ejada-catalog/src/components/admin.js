@@ -44,18 +44,8 @@ function a11yProps(index) {
 
 export default function Admin() {
   const [value, setValue] = React.useState(0);
-  const {users, setUsers} = React.useState([]);
 
 
-  const handleProducts = () => {
-    axios.get(
-      `http://localhost:3000/map-users-ws`
-    )
-      .then((response) => {
-        console.log("maps", response.data);
-        setUsers(response.data);
-      })
-  }
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
@@ -64,18 +54,20 @@ export default function Admin() {
   return (
     <Navbar>
 
-    <Box sx={{ width: '100%' }}>
-      <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-        <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
+    <Box>
+      <Box sx={{ borderBottom: 1, borderColor: 'divider',  }}>
+        <Tabs value={value} sx={{width:'100%','.css-heg063-MuiTabs-flexContainer':{
+          justifyContent:'space-evenly'
+        }}} onChange={handleChange} aria-label="basic tabs example" >
           <Tab label="Users" {...a11yProps(0)} />
           <Tab label="Products" {...a11yProps(1)} />
           <Tab label="Requests" {...a11yProps(2)} />
         </Tabs>
       </Box>
-      <TabPanel value={value} index={0}>
+      <TabPanel value={value} index={0} >
        <UsersAdmin />
       </TabPanel>
-      <TabPanel value={value} index={1}>
+      <TabPanel value={value} index={1} >
 <ProductAdmin/>      </TabPanel>
       <TabPanel value={value} index={2}>
         Requests

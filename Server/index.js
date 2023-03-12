@@ -4,16 +4,18 @@ import asyncjs from 'async';
 import request from 'request';
 import excel from 'exceljs';
 import pm from 'postman-request';
+import pg from 'pg';
 // import Blob from 'node:buffer';
 // import pkg from 'file-saver';
 // const { saveAs } = pkg;
-
+const { Pool, Client } = pg;
 var categories = [];
 var denododb;
 var protocol_denodo = 'http';
 var ip = 'localhost';
 var port_denodo = '9090';
 var password_admin = 'admin';
+var pg_client;
 
 
 export var sync_vdp_datacatalog = function () {
@@ -39,6 +41,49 @@ export var sync_vdp_datacatalog = function () {
         })
     })
 }
+
+export var connect_to_pg = function () {
+    return new Promise((resolve, reject) => {
+    const connectionString = 'postgresql://postgres:admin@localhost:5432/Requests'
+
+    pg_client = new Client({
+        connectionString,
+    })
+    pg_client.connect()
+})
+};
+
+export var insert_request = function (username, wsName, creation_date, status) {
+    pg_client.query(`INSERT INTO request(id, username, ws, creation_date, STATUS) VALUES (DEFAULT, '${username}', '${wsName}', '${creation_date}', '${status}');`, (err, res) => {
+    })
+};
+
+export var select_request_all = function () {
+    return new Promise((resolve, reject) => {
+    pg_client.query(`SELECT * FROM request;`, (err, res) => {
+        console.log(res.rows);
+        return resolve(res.rows);
+    })
+    })
+};
+
+export var select_request_of_user = function (username) {
+    return new Promise((resolve, reject) => {
+    console.log(`SELECT * FROM request where username = '${username}';`);
+    pg_client.query(`SELECT * FROM request where username = '${username}';`, (err, res) => {
+        console.log(res.rows);
+        return resolve(res.rows);
+    })
+    })
+};
+
+export var update_status = function (username, wsName, status) {
+    return new Promise((resolve, reject) => {
+    console.log(`UPDATE request SET status = '${status}' where username = '${username}' and ws = '${wsName}';`);
+    pg_client.query(`UPDATE request SET status = '${status}' where username = '${username}' and ws = '${wsName}';`, (err, res) => {
+    })
+    })
+};
 
 export var connect_denodo = function (user = 'admin', pass = password_admin, database = 'admin') {
     return new Promise((resolve, reject) => {
@@ -92,7 +137,7 @@ export var ws_of_category = function (serverId = 1, uri = '//' + ip + ':9999/adm
     return new Promise((resolve, reject) => {
         request({
             method: 'GET',
-            uri: '' + protocol_denodo + '://' + ip + ':' + port_denodo + '/denodo-data-catalog/public/api/browse/categories/'+category_id+'/elements/type/WEBSERVICES?limit='+limit+'&offset='+offest+'&serverId=' + serverId + '&uri=' + uri + '',
+            uri: '' + protocol_denodo + '://' + ip + ':' + port_denodo + '/denodo-data-catalog/public/api/browse/categories/' + category_id + '/elements/type/WEBSERVICES?limit=' + limit + '&offset=' + offest + '&serverId=' + serverId + '&uri=' + uri + '',
             headers: { 'Authorization': 'Basic YWRtaW46YWRtaW4=', 'Content-Type': 'application/json' }
         }, function (error, response, body) {
             if (!error && response.statusCode == 200) {
@@ -127,7 +172,7 @@ export var ws_of_tag = function (serverId = 1, uri = '//' + ip + ':9999/admin', 
     return new Promise((resolve, reject) => {
         request({
             method: 'GET',
-            uri: '' + protocol_denodo + '://' + ip + ':' + port_denodo + '/denodo-data-catalog/public/api/browse/tags/'+tag_id+'/elements/type/WEBSERVICES?limit='+limit+'&offset='+offest+'&serverId=' + serverId + '&uri=' + uri + '',
+            uri: '' + protocol_denodo + '://' + ip + ':' + port_denodo + '/denodo-data-catalog/public/api/browse/tags/' + tag_id + '/elements/type/WEBSERVICES?limit=' + limit + '&offset=' + offest + '&serverId=' + serverId + '&uri=' + uri + '',
             headers: { 'Authorization': 'Basic YWRtaW46YWRtaW4=', 'Content-Type': 'application/json' }
         }, function (error, response, body) {
             if (!error && response.statusCode == 200) {
@@ -620,7 +665,7 @@ export var access_privilege_on_ws_accepted_user = (databaseName, wsName, userNam
                                         console.log(err);
                                     } else {
                                         //Execute a query
-                                        
+
                                         statement.executeQuery("desc vql webservice " + databaseName + "." + wsName + " ('includeDependencies'='no','replaceExistingElements'='yes','dropElements'='no');",
                                             function (err, resultset) {
                                                 if (err) {
@@ -640,12 +685,12 @@ export var access_privilege_on_ws_accepted_user = (databaseName, wsName, userNam
                                                             var middle_part = results[0].result.substring(first_index + "(BASIC VDP".length, second_index);
                                                             var users = " VDPACCEPTEDUSERS " + "'" + userName + "," + middle_part.substring(middle_part.indexOf("'") + 1, middle_part.length);
                                                             results[0].result = first_part + users + second_part;
-                                                            console.log("first_part",first_part)
-                                                            console.log("middle_part",middle_part)
-                                                            console.log("users",users)
-                                                            console.log("second_part",second_part)
-                                                            console.log(results[0].result+"; \n"+"REDEPLOY WEBSERVICE " + wsName + ";",);
-                                                            statement.executeQuery(results[0].result+";",);
+                                                            console.log("first_part", first_part)
+                                                            console.log("middle_part", middle_part)
+                                                            console.log("users", users)
+                                                            console.log("second_part", second_part)
+                                                            console.log(results[0].result + "; \n" + "REDEPLOY WEBSERVICE " + wsName + ";",);
+                                                            statement.executeQuery(results[0].result + ";",);
                                                             statement.executeQuery("REDEPLOY WEBSERVICE " + wsName + ";",);
                                                             console.log('execution done')
                                                             //return resolve(results);
@@ -950,25 +995,25 @@ export var list_users = () => {
                                     } else {
                                         //Execute a query
                                         statement.executeQuery("LIST USERS;",
-                                        function (err, resultset) {
-                                            if (err) {
-                                                console.log(err);
-                                            } else {
-                                                resultset.toObjArray(function (err, results) {
-                                                    //Printing number of records
-                                                    if (typeof results === 'undefined') {
-                                                        console.log('undefined...');
-                                                        return resolve([]);
+                                            function (err, resultset) {
+                                                if (err) {
+                                                    console.log(err);
+                                                } else {
+                                                    resultset.toObjArray(function (err, results) {
+                                                        //Printing number of records
+                                                        if (typeof results === 'undefined') {
+                                                            console.log('undefined...');
+                                                            return resolve([]);
+                                                        }
+                                                        if (results.length > 0) {
+                                                            return resolve(results);
+                                                        } else {
+                                                            console.log(err);
+                                                        }
                                                     }
-                                                    if (results.length > 0) {
-                                                        return resolve(results);
-                                                    } else {
-                                                        console.log(err);
-                                                    }
+                                                    );
                                                 }
-                                                );
                                             }
-                                        }
                                         );
                                     }
                                 });
@@ -1000,25 +1045,25 @@ export var list_roles = () => {
                                     } else {
                                         //Execute a query
                                         statement.executeQuery("LIST ROLES;",
-                                        function (err, resultset) {
-                                            if (err) {
-                                                console.log(err);
-                                            } else {
-                                                resultset.toObjArray(function (err, results) {
-                                                    //Printing number of records
-                                                    if (typeof results === 'undefined') {
-                                                        console.log('undefined...');
-                                                        return resolve([]);
+                                            function (err, resultset) {
+                                                if (err) {
+                                                    console.log(err);
+                                                } else {
+                                                    resultset.toObjArray(function (err, results) {
+                                                        //Printing number of records
+                                                        if (typeof results === 'undefined') {
+                                                            console.log('undefined...');
+                                                            return resolve([]);
+                                                        }
+                                                        if (results.length > 0) {
+                                                            return resolve(results);
+                                                        } else {
+                                                            console.log(err);
+                                                        }
                                                     }
-                                                    if (results.length > 0) {
-                                                        return resolve(results);
-                                                    } else {
-                                                        console.log(err);
-                                                    }
+                                                    );
                                                 }
-                                                );
                                             }
-                                        }
                                         );
                                     }
                                 });
@@ -1050,25 +1095,25 @@ export var map_users_ws = () => {
                                     } else {
                                         //Execute a query
                                         statement.executeQuery("SELECT elementname, list(username) FROM catalog_permissions(null,null) where elementtype='Web service' group by elementname;",
-                                        function (err, resultset) {
-                                            if (err) {
-                                                console.log(err);
-                                            } else {
-                                                resultset.toObjArray(function (err, results) {
-                                                    //Printing number of records
-                                                    if (typeof results === 'undefined') {
-                                                        console.log('undefined...');
-                                                        return resolve([]);
+                                            function (err, resultset) {
+                                                if (err) {
+                                                    console.log(err);
+                                                } else {
+                                                    resultset.toObjArray(function (err, results) {
+                                                        //Printing number of records
+                                                        if (typeof results === 'undefined') {
+                                                            console.log('undefined...');
+                                                            return resolve([]);
+                                                        }
+                                                        if (results.length > 0) {
+                                                            return resolve(results);
+                                                        } else {
+                                                            console.log(err);
+                                                        }
                                                     }
-                                                    if (results.length > 0) {
-                                                        return resolve(results);
-                                                    } else {
-                                                        console.log(err);
-                                                    }
+                                                    );
                                                 }
-                                                );
                                             }
-                                        }
                                         );
                                     }
                                 });
@@ -1099,8 +1144,8 @@ export var revoke_user = (username, databaseName, wsName) => {
                                         console.log(err);
                                     } else {
                                         //Execute a query
-                                        statement.executeQuery("alter user "+username+" revoke metadata on webservice "+databaseName+"."+wsName+";",
-                                        
+                                        statement.executeQuery("alter user " + username + " revoke metadata on webservice " + databaseName + "." + wsName + ";",
+
                                         );
                                     }
                                 });
@@ -1131,8 +1176,8 @@ export var drop_user = (username) => {
                                         console.log(err);
                                     } else {
                                         //Execute a query
-                                        statement.executeQuery("DROP USER "+username+";",
-                                        
+                                        statement.executeQuery("DROP USER " + username + ";",
+
                                         );
                                     }
                                 });
