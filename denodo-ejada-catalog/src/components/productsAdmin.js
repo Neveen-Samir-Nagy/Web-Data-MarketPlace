@@ -8,11 +8,35 @@ import ImageIcon from '@mui/icons-material/Image';
 import WorkIcon from '@mui/icons-material/Work';
 import BeachAccessIcon from '@mui/icons-material/BeachAccess';
 import axios from 'axios'
-import { IconButton } from '@mui/material';
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Divider, IconButton } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
+import { Box } from '@mui/system';
 
+import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined';
 export default function ProductAdmin() {
     const [products, setProducts] = React.useState('');
+    const [users, setUsers] = React.useState('');
+    const [isHovering, setIsHovering] = React.useState('');
+    const [Delete, setDelete] = React.useState(false);
+
+    const handleMouseOver = (key) => {
+        console.log('over')
+        setIsHovering(key);
+    };
+
+    const handleMouseOut = () => {
+        setIsHovering('');
+    };
+const deleteUser =(user,index,db,wsName)=>{
+  axios.get(
+    `http://localhost:3000/revoke-user/${db[index].list_databases.replace('[' , '').replace(']', '').split(',')[0]}/${wsName}/${user}`
+)
+    .then((response) => {
+       console.log(response.log)
+       setDelete(!Delete)
+    })
+  
+}
 React.useEffect(()=>{
  
         axios.get(
@@ -24,30 +48,53 @@ React.useEffect(()=>{
           })
       
     
-    },[])
+    },[Delete])
  
-    
+ const handleOpenUsers=(key)=>{
+setUsers(key)
+ }   
   return (
     <List sx={{ width: '100%', bgcolor: 'background.paper' }}>
     {products && products.map((user,index)=>(
    <ListItem sx={{
 
-    ':hover':{
-        background:'rgba(0, 0, 0, 0.12)',
-        boxShadow:'inset 0px 0px 1px 1px #00000033'
-    },
-    background:index % 2==0?'rgba(0, 0, 0, 0.12)':'null',
+    
+    background:index % 2!=0?'rgba(0, 0, 0, 0.12)':'null',
     marginBottom:'10px'}} >
-   <ListItemAvatar>
-     <Avatar>
 
-{user.elementname.slice(0,2)}
-     </Avatar>
-   </ListItemAvatar>
-   <ListItemText primary={user.elementname} />
-   <p>
-    {user.list.replace('[' , '').replace(']', '')}
-   </p>
+   <ListItemText primary={user.elementname} secondary={user.list_users.replace('[' , '').replace(']', '')} />
+   <Button variant='contained' onClick={()=>handleOpenUsers(index)}>
+    Show
+   </Button>
+   <Dialog  open={users===index}>
+        <DialogTitle>{user.elementname} Users</DialogTitle>
+        <Divider/>
+
+        <DialogContent>
+
+  {user.list_users.replace('[' , '').replace(']', '').split(',').map((item,index)=>(
+    <Box>
+        
+<Box sx={{
+                            display:'flex',justifyContent:'space-between'}}>
+    {item}
+    <IconButton key={index} onMouseOver={()=>handleMouseOver(index)}
+                            onMouseOut={handleMouseOut} onClick={()=>deleteUser(item,index,products,user.elementname)}edge="end" aria-label="delete">
+                            {isHovering ===index ?<DeleteIcon />: <DeleteOutlineOutlinedIcon /> }
+                        </IconButton>
+</Box>
+<Divider/>
+
+</Box>
+  ))}
+ </DialogContent>
+        <DialogActions>
+        <Button  onClick={()=>handleOpenUsers('')}>
+              Done
+            </Button>
+           
+        </DialogActions>
+        </Dialog>
  </ListItem>
       ))}
             

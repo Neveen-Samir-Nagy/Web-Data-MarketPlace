@@ -97,7 +97,7 @@ function LOGIN() {
           position: "absolute",
           transform: "translate(-50%,-50%)",
           top: "15%",
-          right: "40%",
+          right: "31%",
         }}
         justifyContent="space-between"
       >
@@ -108,9 +108,9 @@ function LOGIN() {
           }}
         >
           <span style={{ fontWeight: '700', color: 'rgb(43 43 43)' }}>
-            Market</span>
+            Data {''}</span>
           <span style={{ fontWeight: '300' }}>
-            Place</span>{" "}
+            MarketPlace</span>{" "}
         </h1>
 
       </Box>

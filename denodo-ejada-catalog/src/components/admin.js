@@ -8,6 +8,7 @@ import Navbar from './Navbar'
 import axios from "axios";
 import UsersAdmin from "./usersAdmin";
 import ProductAdmin from "./productsAdmin";
+import Requests from "./requests";
 
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -70,7 +71,7 @@ export default function Admin() {
       <TabPanel value={value} index={1} >
 <ProductAdmin/>      </TabPanel>
       <TabPanel value={value} index={2}>
-        Requests
+        <Requests/>
       </TabPanel>
     </Box>
     </Navbar>

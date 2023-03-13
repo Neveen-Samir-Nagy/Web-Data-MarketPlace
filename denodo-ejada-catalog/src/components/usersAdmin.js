@@ -15,6 +15,8 @@ import { Box } from '@mui/system';
 export default function UsersAdmin() {
     const [users, setUsers] = React.useState('');
     const [isHovering, setIsHovering] = React.useState('');
+    const [Delete, setDelete] = React.useState(false);
+
     const handleMouseOver = (key) => {
         console.log('over')
         setIsHovering(key);
@@ -23,7 +25,15 @@ export default function UsersAdmin() {
     const handleMouseOut = () => {
         setIsHovering('');
     };
-
+const deleteUser =(user)=>{
+    axios.get(
+        `http://localhost:3000/drop-user/${user}`
+    )
+        .then((response) => {
+           console.log(response.log)
+           setDelete(!Delete)
+        })
+}
     React.useEffect(() => {
         axios.get(
             `http://localhost:3000/list-users`
@@ -32,7 +42,7 @@ export default function UsersAdmin() {
                 setUsers(response.data.map(a => a.name))
             })
 
-    }, [])
+    }, [Delete])
 
 
     return (
@@ -40,11 +50,11 @@ export default function UsersAdmin() {
             {users && users.map((user, index) => (
                 <Box key={index} >
                     <ListItem key={index} sx={{
-                        background: index % 2 != 0 ? "#FFF" : "rgba(0, 0, 0, 0.1)"
+                        background: index % 2 === 0 ? "#FFF" : "rgba(0, 0, 0, 0.1)"
                     }} secondaryAction={
                         <IconButton key={index} onMouseOver={()=>handleMouseOver(index)}
-                            onMouseOut={handleMouseOut} edge="end" aria-label="delete">
-                            {isHovering ===index ? <DeleteOutlineOutlinedIcon />:<DeleteIcon /> }
+                            onMouseOut={handleMouseOut} onClick={()=>deleteUser(user)}edge="end" aria-label="delete">
+                            {isHovering ===index ?<DeleteIcon />: <DeleteOutlineOutlinedIcon /> }
                         </IconButton>
                     }>
                         <ListItemAvatar>

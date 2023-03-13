@@ -1094,7 +1094,7 @@ export var map_users_ws = () => {
                                         console.log(err);
                                     } else {
                                         //Execute a query
-                                        statement.executeQuery("SELECT elementname, list(username) FROM catalog_permissions(null,null) where elementtype='Web service' group by elementname;",
+                                        statement.executeQuery("SELECT elementname, list(username) as list_users,list(dbname) as list_databases FROM catalog_permissions(null,null) where elementtype='Web service' group by elementname;",
                                             function (err, resultset) {
                                                 if (err) {
                                                     console.log(err);
