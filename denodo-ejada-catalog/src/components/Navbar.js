@@ -26,6 +26,7 @@ import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import { Link } from "react-router-dom";
 import  secureLocalStorage  from  "react-secure-storage";
 import Login from "./login";
+import ViewStreamIcon from '@mui/icons-material/ViewStream';
 const drawerWidth = 300;
 
 const openedMixin = (theme) => ({
@@ -234,7 +235,7 @@ null:
         </DrawerHeader>
         <Divider />
         <List>
-          {["Products", "New", "Cart"].map((text, index) => (
+          {["Products", "New", "Requests"].map((text, index) => (
             <Tooltip
               title={text}
               disableHoverListener={open ? true : false}
@@ -274,7 +275,7 @@ null:
                     ) : index % 3 === 1 ? (
                       <LibraryAddIcon />
                     ) : (
-                      <ShoppingCartIcon />
+                      <ViewStreamIcon />
                     )}
                   </ListItemIcon>
                   <ListItemText primary={text} sx={{ opacity: open ? 1 : 0 }} />

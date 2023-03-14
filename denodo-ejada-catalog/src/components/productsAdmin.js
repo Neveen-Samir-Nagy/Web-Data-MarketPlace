@@ -27,77 +27,79 @@ export default function ProductAdmin() {
     const handleMouseOut = () => {
         setIsHovering('');
     };
-const deleteUser =(user,index,db,wsName)=>{
-  axios.get(
-    `http://localhost:3000/revoke-user/${db[index].list_databases.replace('[' , '').replace(']', '').split(',')[0]}/${wsName}/${user}`
-)
-    .then((response) => {
-       console.log(response.log)
-       setDelete(!Delete)
-    })
-  
-}
-React.useEffect(()=>{
- 
+    const deleteUser = (user, index, db, wsName) => {
         axios.get(
-          `http://localhost:3000/map-users-ws`
+            `http://localhost:3000/revoke-user/${db[index].list_databases.replace('[', '').replace(']', '').split(',')[0]}/${wsName}/${user}`
         )
-          .then((response) => {
-            console.log("maps", response.data);
-            setProducts(response.data);
-          })
-      
-    
-    },[Delete])
- 
- const handleOpenUsers=(key)=>{
-setUsers(key)
- }   
-  return (
-    <List sx={{ width: '100%', bgcolor: 'background.paper' }}>
-    {products && products.map((user,index)=>(
-   <ListItem sx={{
+            .then((response) => {
+                console.log(response.log)
+                setDelete(!Delete)
+            })
 
-    
-    background:index % 2!=0?'rgba(0, 0, 0, 0.12)':'null',
-    marginBottom:'10px'}} >
+    }
+    React.useEffect(() => {
 
-   <ListItemText primary={user.elementname} secondary={user.list_users.replace('[' , '').replace(']', '')} />
-   <Button variant='contained' onClick={()=>handleOpenUsers(index)}>
-    Show
-   </Button>
-   <Dialog  open={users===index}>
-        <DialogTitle>{user.elementname} Users</DialogTitle>
-        <Divider/>
+        axios.get(
+            `http://localhost:3000/map-users-ws`
+        )
+            .then((response) => {
+                console.log("maps", response.data);
+                setProducts(response.data);
+            })
 
-        <DialogContent>
 
-  {user.list_users.replace('[' , '').replace(']', '').split(',').map((item,index)=>(
-    <Box>
-        
-<Box sx={{
-                            display:'flex',justifyContent:'space-between'}}>
-    {item}
-    <IconButton key={index} onMouseOver={()=>handleMouseOver(index)}
-                            onMouseOut={handleMouseOut} onClick={()=>deleteUser(item,index,products,user.elementname)}edge="end" aria-label="delete">
-                            {isHovering ===index ?<DeleteIcon />: <DeleteOutlineOutlinedIcon /> }
-                        </IconButton>
-</Box>
-<Divider/>
+    }, [Delete])
 
-</Box>
-  ))}
- </DialogContent>
-        <DialogActions>
-        <Button  onClick={()=>handleOpenUsers('')}>
-              Done
-            </Button>
-           
-        </DialogActions>
-        </Dialog>
- </ListItem>
-      ))}
-            
-    </List>
-  );
+    const handleOpenUsers = (key) => {
+        setUsers(key)
+    }
+    return (
+        <List sx={{ width: '100%', bgcolor: 'background.paper' }}>
+            {products && products.map((user, index) => (
+                <ListItem sx={{
+
+
+                    background: index % 2 != 0 ? 'rgba(0, 0, 0, 0.12)' : 'null',
+                    marginBottom: '10px'
+                }} >
+
+                    <ListItemText primary={user.elementname} secondary={user.list_users.replace('[', '').replace(']', '')} />
+                    <Button variant='contained' onClick={() => handleOpenUsers(index)}>
+                        Show
+                    </Button>
+                    <Dialog open={users === index}>
+                        <DialogTitle>{user.elementname} Users</DialogTitle>
+                        <Divider />
+
+                        <DialogContent>
+
+                            {user.list_users.replace('[', '').replace(']', '').split(',').map((item, index) => (
+                                <Box>
+
+                                    <Box sx={{
+                                        display: 'flex', justifyContent: 'space-between'
+                                    }}>
+                                        {item}
+                                        <IconButton key={index} onMouseOver={() => handleMouseOver(index)}
+                                            onMouseOut={handleMouseOut} onClick={() => deleteUser(item, index, products, user.elementname)} edge="end" aria-label="delete">
+                                            {isHovering === index ? <DeleteIcon /> : <DeleteOutlineOutlinedIcon />}
+                                        </IconButton>
+                                    </Box>
+                                    <Divider />
+
+                                </Box>
+                            ))}
+                        </DialogContent>
+                        <DialogActions>
+                            <Button onClick={() => handleOpenUsers('')}>
+                                Done
+                            </Button>
+
+                        </DialogActions>
+                    </Dialog>
+                </ListItem>
+            ))}
+
+        </List>
+    );
 }

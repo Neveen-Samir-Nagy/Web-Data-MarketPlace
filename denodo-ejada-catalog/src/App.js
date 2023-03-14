@@ -2,7 +2,7 @@
 import LOGIN from "./components/login";
 import Products from "./components/products";
 import New from "./components/new";
-import Cart from "./components/cart";
+import UserRequests from "./components/UserRequests";
 import Guest from "./components/Guest"
 import Admin from "./components/admin"
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
@@ -28,7 +28,7 @@ function App() {
                :
                <Routes><Route path="/products" element={<Products />} />
                <Route path="/new" element={<New />} /> 
-               <Route path="/cart" element={<Cart />} /></Routes>)}
+               <Route path="/requests" element={<UserRequests />} /></Routes>)}
                </main>
                 </BrowserRouter>
   );

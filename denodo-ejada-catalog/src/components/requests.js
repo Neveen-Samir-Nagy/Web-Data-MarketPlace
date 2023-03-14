@@ -15,47 +15,113 @@ import Paper from '@mui/material/Paper';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import axios from 'axios';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import CheckCircleOutlineOutlinedIcon from '@mui/icons-material/CheckCircleOutlineOutlined';
+import CancelOutlinedIcon from '@mui/icons-material/CancelOutlined';
+import CancelIcon from '@mui/icons-material/Cancel';
+import { Chip } from '@mui/material';
+import Tooltip from '@mui/material/Tooltip';
 
-function createData(name, calories, fat, carbs, protein, price) {
+const Row = ({ request,wsname, index, unique,handleNewStatus }) => {
 
-    return {
-        name,
-        calories,
-        fat,
-        carbs,
-        protein,
-        price,
-        history: [
-            {
-                date: '2020-01-05',
-                customerId: '11091700',
-                amount: 3,
-            },
-            {
-                date: '2020-01-02',
-                customerId: 'Anonymous',
-                amount: 1,
-            },
-        ],
+    const [isHovering, setIsHovering] = React.useState('');
+    const [isHoveringClose, setIsHoveringClose] = React.useState('');
+
+    const handleMouseOver = (key) => {
+        setIsHovering(key);
     };
-}
 
-const Row = ({ request, open , index}) => {
-    console.log(request)
-console.log(open);
-console.log(index);
+    const handleMouseOut = () => {
+        setIsHovering('');
+    };
 
-    return (
-        <TableBody>
-        <TableRow key={request.id}>
-            <TableCell component="th" scope="row">
-                {request.username}
-            </TableCell>
-            <TableCell align="right">{request.status}</TableCell>
+    const handleMouseOverClose = (key) => {
+        setIsHoveringClose(key);
+    };
 
-        </TableRow>
+    const handleMouseOutClose = () => {
+        setIsHoveringClose('');
+    };
+    const approve =(item)=>{
+        axios.get(`http://localhost:3000/update-user-requests/${item.username}/${wsname}/APPROVED`)
+        .then((response)=>(console.log(response.data))).then(
+            ()=>{
+                handleNewStatus()            }
+        ).then(()=>(        setIsHoveringClose('')        ))
+    }
+    const reject = (item) =>{
+        axios.get(`http://localhost:3000/update-user-requests/${item.username}/${wsname}/REJECT`)
+        .then((response)=>(console.log(response.data))).then(
+            ()=>{
+                handleNewStatus()            }
+                ).then(()=>(        setIsHoveringClose('')        ))
 
-    </TableBody>);
+   }
+        return (
+        <TableBody sx={{ width: '100%' }}>
+            <TableRow key={request.id} >
+                <TableCell align="center" sx={{ borderBottom: 'none' }} component="th" scope="row">
+                    <div style={{ border: '1px solid rgba(0,0,0,0.21)', backgroundColor: request.status === 'UNDERAPPROVAL' ? 'rgba(0, 0, 0, 0.08)' : request.status === 'IN PROGRESS' ? '#1976d2' : request.status === 'REJECT' ? '#d32f2f' : '#2e7d32', width: '20px', height: '20px', borderRadius: '50%' }}>
+
+                    </div>
+                </TableCell>
+                <TableCell align="center" sx={{ borderBottom: 'none' }} component="th" scope="row">
+                    {request.id}
+                </TableCell>
+                <TableCell align="center" sx={{ borderBottom: 'none' }} component="th" scope="row">
+                    {request.username}
+                </TableCell>
+                <TableCell align="center" sx={{ borderBottom: 'none' }}>
+                    <Chip label={request.status} sx={{
+                        width: '50%', '.css-1j447d8-MuiChip-root': {
+                            justifyContent: 'space-between'
+                        }
+                    }}
+                        color={request.status == 'UNDERAPPROVAL' ? 'default' : request.status === 'IN PROGRESS' ? 'primary' : request.status === 'REJECT' ? 'error' : 'success'} size='small' variant="filled" /></TableCell>
+                <TableCell align="center" sx={{ borderBottom: 'none' }}>{request.creation_date}</TableCell>
+                <Tooltip title="Reject" arrow>
+                    <IconButton
+                        disabled={request.status === 'UNDERAPPROVAL'||request.status === 'REJECT'}
+                        label='agree'
+                        sx={{
+                            color: 'rgba(0,0,0,0.8)',
+
+                            ':hover': {
+                                backgroundColor: 'rgba(0, 0, 0, 0)'
+
+                            }
+                        }}
+                        onMouseOver={() => handleMouseOverClose(index)}
+                        onMouseOut={handleMouseOutClose}
+                        onClick={()=>reject(request)}
+                    >
+                        {isHoveringClose === index ? <CancelIcon /> : <CancelOutlinedIcon />}</IconButton>
+                </Tooltip>
+                <Tooltip title="Accept" arrow>
+                    <IconButton
+
+                        disabled={request.status === 'UNDERAPPROVAL'||request.status === 'APPROVED'}
+                        sx={{
+                            color: 'rgba(0,0,0,0.8)',
+                            ':hover': {
+                                backgroundColor: 'rgba(0, 0, 0, 0)'
+
+                            }
+                        }} onMouseOver={() => handleMouseOver(index)}
+                        onMouseOut={handleMouseOut}
+                        onClick={()=>approve(request)}
+                        >
+
+                        {isHovering === index ? <CheckCircleIcon /> : <CheckCircleOutlineOutlinedIcon />}
+                    </IconButton>
+
+
+                </Tooltip>
+
+
+            </TableRow>
+
+        </TableBody>);
 }
 
 Row.propTypes = {
@@ -79,6 +145,8 @@ Row.propTypes = {
 export default function CollapsibleTable() {
     const [request, setRequest] = useState()
     const [open, setOpen] = React.useState('');
+    const [newStatus, setNewStatus] = React.useState(false);
+
     useEffect(() => {
 
         axios.get(
@@ -99,15 +167,19 @@ export default function CollapsibleTable() {
             })
 
 
-    }, [])
+    }, [newStatus])
+    const handleNewStatus=()=>{
+        setNewStatus(!newStatus)
+    }
     return (
 
         <TableContainer>
             <Table aria-label="collapsible table">
                 <TableHead  >
                     <TableRow >
+
+                        <TableCell sx={{ fontWeight: 'bold' }}>Product Name </TableCell>
                         <TableCell />
-                        <TableCell sx={{ fontWeight: 'bold' }}>Request </TableCell>
 
                     </TableRow>
                 </TableHead>
@@ -115,48 +187,54 @@ export default function CollapsibleTable() {
                     {request && Object.keys(request).map((key, index) => (
                         <>
                             <TableRow sx={{ '& > *': { borderBottom: 'unset' } }}>
-                                <TableCell>
-                                    <IconButton
-                                        aria-label="expand row"
-                                        size="small"
-                                        onClick={() => setOpen(open===index? null : index)}
-                                    >
-                                        {open===index ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
-                                    </IconButton>
-                                </TableCell>
+                              
+                              
                                 <TableCell component="th" scope="row">
                                     {key}
                                 </TableCell>
-                                
+                                <TableCell align='right'>
+                                    <IconButton
+                                        aria-label="expand row"
+                                        size="small"
+                                        onClick={() => setOpen(open === index ? null : index)}
+                                    >
+                                        {open === index ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+                                    </IconButton>
+                                </TableCell>
                             </TableRow>
-                            
-                            
+
+
                             <TableRow>
                                 <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
-                                    <Collapse in={open===index} timeout="auto" unmountOnExit>
+                                    <Collapse in={open === index} timeout="auto" unmountOnExit>
                                         <Box sx={{ margin: 1 }}>
-                                
+
                                             <Table size="small" aria-label="purchases">
                                                 <TableHead>
-                                                    <TableRow>
-                                                        <TableCell>username</TableCell>
-                                                        <TableCell align="right">status</TableCell>
+                                                    <TableRow >
+                                                        <TableCell sx={{ fontWeight: '600' }} align="center"></TableCell>
+                                                        <TableCell sx={{ fontWeight: '600' }} align="center">Request ID</TableCell>
+                                                        <TableCell sx={{ fontWeight: '600' }} align="center">creation date</TableCell>
+                                                        <TableCell sx={{ fontWeight: '600' }} align="center">status</TableCell>
+                                                        <TableCell sx={{ fontWeight: '600' }} align="center">username</TableCell>
+                                                        <TableCell sx={{ fontWeight: '600' }} align="center"></TableCell>
+
                                                     </TableRow>
                                                 </TableHead>
                                                 {
-                                request[key].map((requestItem) => {
-                                    return (
-                                     <Row request={requestItem} open={open} index={index} />
-                                    )
-                                })
+                                                    request[key].map((requestItem, id) => {
+                                                        return (
+                                                            <Row request={requestItem} handleNewStatus={handleNewStatus} wsname={key} unique={id} index={index} />
+                                                        )
+                                                    })
 
-                            
-                            }
+
+                                                }
                                             </Table>
                                         </Box>
                                     </Collapse>
                                 </TableCell>
-                                </TableRow>
+                            </TableRow>
                         </>
 
                     ))}

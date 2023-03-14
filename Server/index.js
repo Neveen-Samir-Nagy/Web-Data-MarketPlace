@@ -60,7 +60,7 @@ export var insert_request = function (username, wsName, creation_date, status) {
 
 export var select_request_all = function () {
     return new Promise((resolve, reject) => {
-    pg_client.query(`SELECT * FROM request;`, (err, res) => {
+    pg_client.query(`SELECT * FROM request order by id;`, (err, res) => {
         console.log(res.rows);
         return resolve(res.rows);
     })
@@ -70,7 +70,7 @@ export var select_request_all = function () {
 export var select_request_of_user = function (username) {
     return new Promise((resolve, reject) => {
     console.log(`SELECT * FROM request where username = '${username}';`);
-    pg_client.query(`SELECT * FROM request where username = '${username}';`, (err, res) => {
+    pg_client.query(`SELECT * FROM request where username = '${username}' order by id;`, (err, res) => {
         console.log(res.rows);
         return resolve(res.rows);
     })

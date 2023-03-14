@@ -258,9 +258,10 @@ app.get('/connect-postgres', (req, res) => {
 
 app.post('/insert-request', (req, res) => {
     connect_to_pg();
-    var craetion_date = ''+new Date().getFullYear()+'-'+(new Date().getMonth()+1)+'-'+new Date().getDate()+'';
+    var creation_date = ''+new Date().getFullYear()+'-'+(new Date().getMonth()+1)+'-'+new Date().getDate()+'';
+    console.log(creation_date)
     req.body.ws.forEach(wsName => {
-        var insertion = insert_request(String(req.body.username), wsName, craetion_date, String(req.body.status))
+        var insertion = insert_request(String(req.body.username), wsName, creation_date, String(req.body.status))
     })
     res.send('Done');
 });
