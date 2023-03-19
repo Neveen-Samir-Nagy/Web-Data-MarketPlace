@@ -47,6 +47,7 @@ const Row = ({ request,wsname, index, unique,handleNewStatus }) => {
         .then((response)=>(console.log(response.data))).then(
             ()=>{
                 handleNewStatus()            }
+                
         ).then(()=>(        setIsHoveringClose('')        ))
     }
     const reject = (item) =>{

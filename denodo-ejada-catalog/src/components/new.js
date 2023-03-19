@@ -92,6 +92,7 @@ function New() {
     setOpen(true);
 
     { console.log(serviceName) }
+    
   };
   const handleAddToCart = (item) => {
     axios.post("http://localhost:3000/insert-request", {

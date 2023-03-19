@@ -78,7 +78,6 @@ export default function Cart() {
           </Container>
 
 </Box>
-  
     </Navbar>
   );
 }
