@@ -69,8 +69,16 @@ export var select_request_all = function () {
 
 export var select_request_of_user = function (username) {
     return new Promise((resolve, reject) => {
-    console.log(`SELECT * FROM request where username = '${username}';`);
     pg_client.query(`SELECT * FROM request where username = '${username}' order by id;`, (err, res) => {
+        console.log(res.rows);
+        return resolve(res.rows);
+    })
+    })
+};
+
+export var select_requests_withStatus = function (username, status) {
+    return new Promise((resolve, reject) => {
+    pg_client.query(`SELECT * FROM request where username = '${username}' and status = '${status}' order by id;`, (err, res) => {
         console.log(res.rows);
         return resolve(res.rows);
     })
@@ -79,8 +87,14 @@ export var select_request_of_user = function (username) {
 
 export var update_status = function (username, wsName, status) {
     return new Promise((resolve, reject) => {
-    console.log(`UPDATE request SET status = '${status}' where username = '${username}' and ws = '${wsName}';`);
     pg_client.query(`UPDATE request SET status = '${status}' where username = '${username}' and ws = '${wsName}';`, (err, res) => {
+    })
+    })
+};
+
+export var delete_request = function (username, wsName, status) {
+    return new Promise((resolve, reject) => {
+    pg_client.query(`DELETE FROM request WHERE status = '${status}' and username = '${username}' and ws = '${wsName}';`, (err, res) => {
     })
     })
 };

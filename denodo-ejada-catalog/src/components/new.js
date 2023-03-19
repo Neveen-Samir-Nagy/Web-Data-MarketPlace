@@ -93,7 +93,16 @@ function New() {
 
     { console.log(serviceName) }
   };
-
+  const handleAddToCart = (item) => {
+    axios.post("http://localhost:3000/insert-request", {
+      username: secureLocalStorage.getItem('user'),
+      ws: [item],
+      status: "IN CART"
+  })
+    .then((res)=>{
+     console.log(res.data)
+    })
+  };
   const handleNewRequest = (key) => {
     axios.get('http://localhost:3000/ws-viewName/'+wsNew[key].database_name+'/'+wsNew[key].service_name)
       .then((res) => {
@@ -161,7 +170,7 @@ function New() {
                   disableSpacing
                 >
                   <IconButton>
-                    <AddShoppingCartIcon onClick={() => handleNewRequest(key)} />
+                    <AddShoppingCartIcon onClick={() => handleAddToCart(item.service_name)} />
                   </IconButton>
                   <IconButton>
                     <InfoIcon onClick={() => handleClickOpen(key)} />

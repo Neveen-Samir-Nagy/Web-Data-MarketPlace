@@ -1,4 +1,4 @@
-import { sync_vdp_datacatalog, categories, connect_denodo, create_api, get_ws_url, ws_details, sample_data, views, view_columns, view_details, catalog_permissions, webcontainer_services, webservices, create_datasource, create_remoteTable, access_privilege, redploy_ws, sample_data_from_ws, sample_data_link_ws, openApi, connection_details, sample_data_link_ws_pm, create_user, tags, list_users, list_roles, map_users_ws, revoke_user, drop_user, ws_of_category, ws_of_tag, connect_to_pg, insert_request, select_request_all, select_request_of_user, update_status } from './index.js';
+import { sync_vdp_datacatalog, select_requests_withStatus, categories, connect_denodo, create_api, get_ws_url, ws_details, sample_data, views, view_columns, view_details, catalog_permissions, webcontainer_services, webservices, create_datasource, create_remoteTable, access_privilege, redploy_ws, sample_data_from_ws, sample_data_link_ws, openApi, connection_details, sample_data_link_ws_pm, create_user, tags, list_users, list_roles, map_users_ws, revoke_user, drop_user, ws_of_category, ws_of_tag, connect_to_pg, insert_request, select_request_all, select_request_of_user, update_status, delete_request } from './index.js';
 import express from 'express';
 import cors from 'cors';
 import bp from 'body-parser';
@@ -282,12 +282,30 @@ app.get('/user-requests/:username', (req, res) => {
     );
 });
 
-app.get('/update-user-requests/:username/:wsName/:status', (req, res) => {
+app.get('/request-withStatus/:username/:status', (req, res) => {
     connect_to_pg();
-    const users = update_status(String(req.params.username), String(req.params.wsName), String(req.params.status))
+    const users = select_requests_withStatus(String(req.params.username), String(req.params.status)).then(function (results) {
+        res.send(results);
+    }
+    );
+});
+
+app.get('/update-user-requests/:username/:ws/:status', (req, res) => {
+    connect_to_pg();
+    //const users = update_status(String(req.params.username), String(req.params.wsName), String(req.params.status))
+    req.body.ws.forEach(wsName => {
+        var users = update_status(String(req.params.username), wsName, String(req.params.status));
+    })
     res.send('Done');
 
 });
+
+app.get('/delete-request/:username/:wsName/:status', (req, res) => {
+    connect_to_pg();
+    const users = delete_request(String(req.params.username), String(req.params.wsName), String(req.params.status))
+    res.send('Done');
+});
+
 
 // views(1, '//'+ip+':9999/admin', 'testdb', 50,1);
 // console.log(sample_data(denododb, 'testdb', 'bv_dev_usecase_roles'));

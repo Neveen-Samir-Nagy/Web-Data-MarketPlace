@@ -17,7 +17,7 @@ import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 
-import { Menu, MenuItem, Tooltip } from "@mui/material";
+import { Badge, Menu, MenuItem, Tooltip } from "@mui/material";
 import AccountCircle from "@mui/icons-material/AccountCircle";
 import LogoutIcon from "@mui/icons-material/Logout";
 import LibraryAddIcon from "@mui/icons-material/LibraryAdd";
@@ -235,7 +235,7 @@ null:
         </DrawerHeader>
         <Divider />
         <List>
-          {["Products", "New", "Requests"].map((text, index) => (
+          {["Products", "New","Cart", "Requests"].map((text, index) => (
             <Tooltip
               title={text}
               disableHoverListener={open ? true : false}
@@ -270,11 +270,23 @@ null:
                       justifyContent: "center",
                     }}
                   >
-                    {index % 3 === 0 ? (
+                    {index % 4 === 0 ? (
                       <StorageIcon />
-                    ) : index % 3 === 1 ? (
+                    ) : index % 4 === 1 ? (
                       <LibraryAddIcon />
-                    ) : (
+                    ) : index % 4 === 2 ? (
+                      <Badge
+                      badgeContent={0}
+                      showZero
+                      color="error"
+                      anchorOrigin={{
+                        vertical:'top',
+                        horizontal:'left'
+                      }}>
+                      <ShoppingCartIcon/>
+
+                      </Badge>
+                    ):(
                       <ViewStreamIcon />
                     )}
                   </ListItemIcon>

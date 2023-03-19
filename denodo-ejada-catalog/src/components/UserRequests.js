@@ -99,38 +99,39 @@ export default function UserRequests() {
                     </TableHead>
                     <TableBody>
                         {request && request.map((key, index) => (
-                        <>
-                                <TableRow >
-                                    <TableCell align="center" component="th" scope="row">
-                                        <div style={{ border: '1px solid rgba(0,0,0,0.21)', backgroundColor: key.status === 'UNDERAPPROVAL' ? 'rgba(0, 0, 0, 0.08)' : key.status === 'IN PROGRESS' ? '#1976d2' : key.status === 'REJECT' ? '#d32f2f' : '#2e7d32', width: '20px', height: '20px', borderRadius: '50%' }}>
+                  key.status==='IN CART'?null:
+                  <>
+                  <TableRow >
+                      <TableCell align="center" component="th" scope="row">
+                          <div style={{ border: '1px solid rgba(0,0,0,0.21)', backgroundColor: key.status === 'UNDERAPPROVAL' ? 'rgba(0, 0, 0, 0.08)' : key.status === 'IN PROGRESS' ? '#1976d2' : key.status === 'REJECT' ? '#d32f2f' : '#2e7d32', width: '20px', height: '20px', borderRadius: '50%' }}>
 
-                                        </div>
-                                    </TableCell>
-                                    <TableCell align="center" component="th" scope="row">
-                                        {key.id}
-                                    </TableCell>
+                          </div>
+                      </TableCell>
+                      <TableCell align="center" component="th" scope="row">
+                          {key.id}
+                      </TableCell>
 
-                                    <TableCell align="center" component="th" scope="row">
-                                        {key.ws}
-                                    </TableCell>
-                                    <TableCell align="center" component="th" scope="row">
-                                        {key.creation_date}
-                                    </TableCell>
+                      <TableCell align="center" component="th" scope="row">
+                          {key.ws}
+                      </TableCell>
+                      <TableCell align="center" component="th" scope="row">
+                          {key.creation_date}
+                      </TableCell>
 
-                                    <TableCell align="center" >
-                                        <Chip label={key.status} sx={{
-                                            width: '50%', '.css-1j447d8-MuiChip-root': {
-                                                justifyContent: 'space-between'
-                                            }
-                                        }}
-                                            color={key.status == 'UNDERAPPROVAL' ? 'default' : key.status === 'IN PROGRESS' ? 'primary' : key.status === 'REJECT' ? 'error' : 'success'} size='small' variant="filled" />
-                                            </TableCell>
-                            </TableRow>
+                      <TableCell align="center" >
+                          <Chip label={key.status} sx={{
+                              width: '50%', '.css-1j447d8-MuiChip-root': {
+                                  justifyContent: 'space-between'
+                              }
+                          }}
+                              color={key.status == 'UNDERAPPROVAL' ? 'default' : key.status === 'IN PROGRESS' ? 'primary' : key.status === 'REJECT' ? 'error' : 'success'} size='small' variant="filled" />
+                              </TableCell>
+              </TableRow>
 
 
-                         
-             
-                        </>
+           
+
+          </>
 
                     ))}
                 </TableBody>

@@ -4,6 +4,8 @@ import Products from "./components/products";
 import New from "./components/new";
 import UserRequests from "./components/UserRequests";
 import Guest from "./components/Guest"
+import Cart from "./components/Cart"
+
 import Admin from "./components/admin"
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import secureLocalStorage from "react-secure-storage";
@@ -28,6 +30,8 @@ function App() {
                :
                <Routes><Route path="/products" element={<Products />} />
                <Route path="/new" element={<New />} /> 
+               <Route path="/cart" element={<Cart />} /> 
+
                <Route path="/requests" element={<UserRequests />} /></Routes>)}
                </main>
                 </BrowserRouter>

@@ -86,25 +86,18 @@ function LOGIN() {
         background:
           "linear-gradient(103deg, rgba(42,208,228,1) 0%, rgba(42,167,228,1) 34%, rgba(23,77,142,1) 84%, rgba(29,49,131,1) 100%)",
         height: "100vh",
-        position: "relative",
       }}
     >
       <Box
+      sx={{height:'100%'}}
         display="flex"
         flexDirection="column"
-        alignItems="flex-start"
-        sx={{
-          position: "absolute",
-          transform: "translate(-50%,-50%)",
-          top: "15%",
-          right: "31%",
-        }}
-        justifyContent="space-between"
+        alignItems="center"
+        justifyContent="center"
       >
         <h1
           style={{
             color: "#fff",
-            marginBottom: "0",
           }}
         >
           <span style={{ fontWeight: '700', color: 'rgb(43 43 43)' }}>
@@ -113,17 +106,13 @@ function LOGIN() {
             MarketPlace</span>{" "}
         </h1>
 
-      </Box>
+      
       <Box
         sx={{
-          left: "50%",
-          top: "25%",
-          transform: "translate(-50%,0)",
           padding: "30px 40px 0 40px",
           height: "50%",
           background: "#fff",
           borderRadius: "10px",
-          position: "absolute",
           boxShadow:
             " 0px 0px 10px 2px rgb(82 73 73)",
         }}
@@ -263,6 +252,7 @@ function LOGIN() {
             )}
           </Box>
         </form>
+      </Box>
       </Box>
     </Box>
   );

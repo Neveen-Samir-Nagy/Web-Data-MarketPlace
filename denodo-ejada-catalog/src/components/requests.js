@@ -153,8 +153,8 @@ export default function CollapsibleTable() {
             `http://localhost:3000/all-requests`
         )
             .then((response) => {
-
-                var nreq = response.data.reduce(
+                 
+               var nreq = response.data.reduce(
                     (requests, curRequest) => {
                         var reqs = (requests[curRequest.ws] || []);
                         reqs.push(curRequest);
@@ -164,7 +164,7 @@ export default function CollapsibleTable() {
                 )
 
                 setRequest(nreq);
-            })
+    })
 
 
     }, [newStatus])
