@@ -56,7 +56,9 @@ app_postgres.get('/request-withStatus/:username/:status', (req, res) => {
 app_postgres.post('/update-user-requests', (req, res) => {
      connect_to_pg();
       //const users = update_status(String(req.params.username), String(req.params.wsName), String(req.params.status))    
-      req.body.ws.forEach(wsName => { var users = update_status(String(req.body.username), wsName, String(req.body.status),String(req.body.viewname)); })
+      req.body.ws.forEach(wsName => { 
+        var users = update_status(String(req.body.database_name), String(req.body.username), wsName, String(req.body.status),String(req.body.viewname)); 
+    })
        res.send('Done');
     }
 );

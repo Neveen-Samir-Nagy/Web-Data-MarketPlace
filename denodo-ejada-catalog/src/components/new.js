@@ -30,18 +30,8 @@ import Paper from "@mui/material/Paper";
 import RemoveRedEyeIcon from "@mui/icons-material/RemoveRedEye";
 
 import * as React from 'react';
-import Dialog from '@mui/material/Dialog';
-import ListItemText from '@mui/material/ListItemText';
-import ListItem from '@mui/material/ListItem';
-import List from '@mui/material/List';
-import AppBar from '@mui/material/AppBar';
-import Toolbar from '@mui/material/Toolbar';
-import CloseIcon from '@mui/icons-material/Close';
-import Slide from '@mui/material/Slide';
-import { TransitionProps } from '@mui/material/transitions';
 import { useEffect, useState } from "react";
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
+
 import secureLocalStorage from "react-secure-storage";
 
 function New() {
@@ -53,15 +43,12 @@ function New() {
 
   const [DB, setDB] = useState('');
 
-  const [viewsMetaSchema, setViewsMetaSchema] = useState([]);
-  const [viewsTags, setViewsTags] = useState([]);
-  const [viewsCategories, setViewsCategories] = useState([]);
-  const [wsType, setWsType] = useState('');
-  const [loadingData, setLoadingData] = useState(false);
+
   const [remove, setRemove] = useState(false);
 
 
   useEffect(() => {
+
     secureLocalStorage.getItem("products") ?
       setWsNew(secureLocalStorage.getItem("products"))
       :
@@ -91,17 +78,18 @@ function New() {
     setDB(wsNew[key].database_name)
     setOpen(true);
 
-    { console.log(serviceName) }
-    
   };
-  const handleAddToCart = (item) => {
+  const handleAddToCart = (item,index) => {
     axios.post("http://localhost:3000/insert-request", {
       username: secureLocalStorage.getItem('user'),
       ws: [item],
+      database: wsNew[index].database_name,
       status: "IN CART"
   })
     .then((res)=>{
+      secureLocalStorage.removeItem('products')
      console.log(res.data)
+     setRemove(!remove)
     })
   };
   const handleNewRequest = (key) => {
@@ -128,7 +116,7 @@ function New() {
 
   return (
 
-    <Navbar>
+    <Navbar useEffect={remove}>
       <Box>
         <h3 style={{ position: "static" }}>products to purchase</h3>
         <Divider />
@@ -141,7 +129,7 @@ function New() {
             justifyContent: "flex-start",
           }}
         >
-          {wsNew.map((item, key) => (!item.subscripe ?
+          {wsNew.map((item, key) => (!item.subscripe && !item.inCart ?
             <Box>
               <Card
                 sx={{
@@ -171,7 +159,7 @@ function New() {
                   disableSpacing
                 >
                   <IconButton>
-                    <AddShoppingCartIcon onClick={() => handleAddToCart(item.service_name)} />
+                    <AddShoppingCartIcon onClick={() => handleAddToCart(item.service_name,key)} />
                   </IconButton>
                   <IconButton>
                     <InfoIcon onClick={() => handleClickOpen(key)} />

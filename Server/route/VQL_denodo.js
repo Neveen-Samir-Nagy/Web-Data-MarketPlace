@@ -3,6 +3,7 @@ import cors from 'cors';
 import bp from 'body-parser';
 import http from 'http';
 import { access_privilege, catalog_permissions, connect_denodo, create_api, create_datasource, create_remoteTable, create_user, drop_user, list_roles, list_users, map_users_ws, redploy_ws, revoke_user, webservices } from '../modules/VQL_denodo.js';
+import { connect_to_pg, select_requests_withStatus_wsdeatils } from '../modules/postgres.js';
 
 export const app_vql = express();
 app_vql.use(cors());
@@ -30,8 +31,27 @@ app_vql.get('/catalog_permissions/:user', (req, res) => {
 });
 
 app_vql.get('/webcontainer_services/:user', (req, res) => {
+    var count = 0;
     const final_ws = webservices(String(req.params.user)).then(function (results) {
-        res.send(results);
+        connect_to_pg();
+        var inCart = select_requests_withStatus_wsdeatils(String(req.params.user)).then(function (results1) {
+        results.forEach(async function (element, index) {
+            try {
+                    count++;
+                    if(results1.filter( web => web.ws === element.service_name ).length != 0){
+                        element.inCart = true;
+                    }else{
+                        element.inCart = false;
+                    }
+                
+            } catch (err) {
+                console.log('Error', err);
+            }
+        });
+        if(count >= results.length){
+            res.send(results);
+        }
+    });
     });
 });
 

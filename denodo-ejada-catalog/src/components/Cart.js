@@ -20,7 +20,6 @@ export default function Cart() {
   const [cartRequests, setCartRequests] =useState("");
 
   useEffect(() => {
-
     axios
       .get(
         `http://localhost:3000/request-withStatus/${secureLocalStorage.getItem(
@@ -36,7 +35,7 @@ export default function Cart() {
       console.log(cartRequests)
   }, [DeleteCart]);
   const handleDeleteCart = (item) => {
-    
+    secureLocalStorage.removeItem('products')
     axios
     .get(
       `http://localhost:3000/delete-request/${secureLocalStorage.getItem('user')}/${item}/IN CART`
@@ -49,16 +48,29 @@ export default function Cart() {
       console.log(error);
     });
   };
-  return (
-    <Navbar>
-  <Box >
+  const handlePurchase = (item) => {
+    const array=cartRequests.map(obj=>obj.ws)
+console.log(array)
+console.log(item.username)
+axios
+.post(`http://localhost:3000/update-user-requests`, {
+  username: secureLocalStorage.getItem('user'),
+  ws: array,
+  status: "UNDERAPPROVAL",
+})
+.then((res) => (
+  console.log(res.data), setDeleteCart(!DeleteCart),
+  console.log(DeleteCart)))
+};
+  return (  
+    <Navbar useEffect={DeleteCart}>
+
+  <Box sx={{position:'relative'}}>
   <h3 style={{ position: "static" }}>Cart Items</h3>
         <Divider />
   <Container maxWidth='lg' sx={{marginTop:'15px',display:'flex',justifyContent:'space-between',flexWrap:'wrap'}}>
   {cartRequests && cartRequests.map((item,index)=>(
-   
  <List sx={{width:'48%' , marginBottom:'20px', border:'1px solid rgba(0,0,0,0.1)'}}>
-
 <ListItem
   secondaryAction={
     <IconButton onClick={()=>handleDeleteCart(item.ws)} edge="end" aria-label="delete">
@@ -76,8 +88,11 @@ export default function Cart() {
 </List>    
       ))  }
           </Container>
-
+          <Button onClick={handlePurchase} variant="contained" sx={{position:'fixed',bottom:'5%',right:'5%'}}>
+  Checkout
+</Button>
 </Box>
+  
     </Navbar>
   );
 }

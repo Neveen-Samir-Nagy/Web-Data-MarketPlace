@@ -4,6 +4,7 @@ import asyncjs from 'async';
 import request from 'request';
 import excel from 'exceljs';
 import { password_admin, ip, port_denodo, protocol_denodo } from '../index.js';
+import { select_requests_withStatus } from './postgres.js';
 
 var denododb;
 
@@ -192,15 +193,6 @@ export var webservices = (user) => {
                 var count = 0;
                 results1.forEach(function (element) {
                     try {
-                        // var view_detail = await ws_details(1, '//'+ip+':9999/admin', String(element['database_name']), String(element['service_name'])).then(function (results) {
-                        //     count++;
-                        //     results = JSON.parse([results]);
-                        //     element.id = results.id;
-                        //     element.viewName = results.localWsOperations;
-                        //     element.tags = results.tags;
-                        //     element.categories = results.categories;
-                        //     element.schema = results.schema;
-                        //     element.url = results.connectionUris['web-service-connection-url'];
                         if (results2.find(ws => ws['username'] === 'admin') !== undefined) {
                             element.subscripe = true;
                         } else if (results2.find(ws => ws['dbname'] === element['database_name'] && ws['elementname'] === element['service_name']) === undefined) {
@@ -208,12 +200,7 @@ export var webservices = (user) => {
                         } else {
                             element.subscripe = true;
                         }
-                        //Don't touch this comment or there will be no return (bossey htz3al)
-                        // if(count === results1.length){
                         return resolve(results1);
-                        // }
-
-                        // });
                     } catch (err) {
                         console.log('Error', err);
                     }

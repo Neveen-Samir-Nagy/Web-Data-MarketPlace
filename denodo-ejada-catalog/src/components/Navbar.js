@@ -15,8 +15,8 @@ import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
-
 import ListItemText from "@mui/material/ListItemText";
+
 import { Badge, Menu, MenuItem, Tooltip } from "@mui/material";
 import AccountCircle from "@mui/icons-material/AccountCircle";
 import LogoutIcon from "@mui/icons-material/Logout";
@@ -24,9 +24,10 @@ import LibraryAddIcon from "@mui/icons-material/LibraryAdd";
 import StorageIcon from "@mui/icons-material/Storage";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import { Link } from "react-router-dom";
-import  secureLocalStorage  from  "react-secure-storage";
+import secureLocalStorage from "react-secure-storage";
 import Login from "./login";
-import ViewStreamIcon from '@mui/icons-material/ViewStream';
+import ViewStreamIcon from "@mui/icons-material/ViewStream";
+import axios from "axios";
 const drawerWidth = 300;
 
 const openedMixin = (theme) => ({
@@ -102,6 +103,7 @@ const Drawer = styled(MuiDrawer, {
 
 export default function MiniDrawer(props) {
   const { children } = props;
+  const [cartLength, setCartLength] = React.useState("");
 
   const theme = useTheme();
   const [open, setOpen] = React.useState(false);
@@ -126,9 +128,26 @@ export default function MiniDrawer(props) {
   if (secureLocalStorage.getItem("login") !== true) {
     window.location.replace("/");
   }
+
+  React.useEffect(() => {
+    secureLocalStorage.removeItem("cartLength")
+    axios
+      .get(
+        `http://localhost:3000/request-withStatus/${secureLocalStorage.getItem(
+          "user"
+        )}/IN CART`
+      )
+      .then((res) => (secureLocalStorage.setItem('cartLength',res.data.length)))
+      .then(()=>(setCartLength(secureLocalStorage.getItem("cartLength"))))
+      .catch((error) => {
+        console.log(error);
+      });
+    console.log(cartLength);
+  }, [props.useEffect]);
   return (
     <Box sx={{ display: "flex" }}>
       <CssBaseline />
+
       <AppBar position="fixed" open={open}>
         <Toolbar
           style={{
@@ -144,30 +163,47 @@ export default function MiniDrawer(props) {
               alignItems: "center",
             }}
           >
-                     {(secureLocalStorage.getItem("user") === 'admin'||secureLocalStorage.getItem("admin") === 'yes')?
-null:
-            <IconButton
-              size="large"
-              edge="start"
-              color="inherit"
-              onClick={handleDrawerOpen}
-              aria-label="open drawer"
-              sx={{ ...(open && { display: "none" }) }}
-            >
-              <MenuIcon />
-            </IconButton>}
+            {secureLocalStorage.getItem("user") === "admin" ||
+            secureLocalStorage.getItem("admin") === "yes" ||
+            secureLocalStorage.getItem("manager") === "yes" ? null : (
+              <IconButton
+                size="large"
+                edge="start"
+                color="inherit"
+                onClick={handleDrawerOpen}
+                aria-label="open drawer"
+                sx={{ ...(open && { display: "none" }) }}
+              >
+                <MenuIcon />
+              </IconButton>
+            )}
             <Typography
               variant="h6"
-             component= {(secureLocalStorage.getItem("user") === 'admin'||secureLocalStorage.getItem("admin") === 'yes')?
-null:             Link}
-                to=         {(secureLocalStorage.getItem("user") === 'admin'||secureLocalStorage.getItem("admin") === 'yes')?
-null:                "/products"}
+              component={
+                secureLocalStorage.getItem("user") === "admin" ||
+                secureLocalStorage.getItem("admin") === "yes" ||
+                secureLocalStorage.getItem("manager") === "yes"
+                  ? null
+                  : Link
+              }
+              to={
+                secureLocalStorage.getItem("user") === "admin" ||
+                secureLocalStorage.getItem("admin") === "yes" ||
+                secureLocalStorage.getItem("manager") === "yes"
+                  ? null
+                  : "/products"
+              }
               noWrap
               sx={{
                 padding: 0,
                 color: "#fff",
                 textDecoration: "none",
-                cursor:((secureLocalStorage.getItem("user") === 'admin'||secureLocalStorage.getItem("admin") === 'yes')?"context-menu":"pointer"),
+                cursor:
+                  secureLocalStorage.getItem("user") === "admin" ||
+                  secureLocalStorage.getItem("admin") === "yes" ||
+                  secureLocalStorage.getItem("manager") === "yes"
+                    ? "context-menu"
+                    : "pointer",
                 ml: 2,
               }}
             >
@@ -190,7 +226,7 @@ null:                "/products"}
               id="menu-appbar"
               anchorEl={anchorEl}
               anchorOrigin={{
-                vertical: "top",
+                vertical: "bottom",
                 horizontal: "right",
               }}
               keepMounted
@@ -201,15 +237,17 @@ null:                "/products"}
               open={Boolean(anchorEl)}
               onClose={handleClose}
             >
-                       {secureLocalStorage.getItem("Guest") === 'yes'?
-null
-:                <Typography sx={{padding:'6px 12px'}}>{secureLocalStorage.getItem("user")}</Typography>
-            }
-                      {(secureLocalStorage.getItem("user") === 'admin'||secureLocalStorage.getItem("admin") === 'yes')?
-null:
+              {secureLocalStorage.getItem("Guest") === "yes" ? null : (
+                <Typography sx={{ padding: "6px 12px" }}>
+                  {secureLocalStorage.getItem("user")}
+                </Typography>
+              )}
+              {secureLocalStorage.getItem("user") === "admin" ||
+              secureLocalStorage.getItem("admin") === "yes" ||
+              secureLocalStorage.getItem("manager") === "yes" ? null : (
                 <Divider />
-                   }
-                            <MenuItem
+              )}
+              <MenuItem
                 onClick={() => {
                   secureLocalStorage.clear();
                   window.location.replace("/");
@@ -221,82 +259,90 @@ null:
           </div>
         </Toolbar>
       </AppBar>
-      {(secureLocalStorage.getItem("user") === 'admin'||secureLocalStorage.getItem("admin") === 'yes')?
-null:
-      <Drawer variant="permanent" open={open}>
-        <DrawerHeader>
-          <IconButton onClick={handleDrawerClose}>
-            {theme.direction === "rtl" ? (
-              <ChevronRightIcon />
-            ) : (
-              <ChevronLeftIcon />
-            )}
-          </IconButton>
-        </DrawerHeader>
-        <Divider />
-        <List>
-          {["Products", "New","Cart", "Requests"].map((text, index) => (
-            <Tooltip
-              title={text}
-              disableHoverListener={open ? true : false}
-              placement="right"
-              arrow
-              PopperProps={{
-                sx: {
-                  "& .MuiTooltip-tooltipArrow	": {
-                    fontSize: "15px",
+      {secureLocalStorage.getItem("user") === "admin" ||
+      secureLocalStorage.getItem("admin") === "yes" ||
+      secureLocalStorage.getItem("manager") === "yes" ? null : (
+        <Drawer variant="permanent" open={open}>
+          <DrawerHeader>
+            <IconButton onClick={handleDrawerClose}>
+              {theme.direction === "rtl" ? (
+                <ChevronRightIcon />
+              ) : (
+                <ChevronLeftIcon />
+              )}
+            </IconButton>
+          </DrawerHeader>
+          <Divider />
+          <List>
+            {["Products", "New", "Cart", "Requests"].map((text, index) => (
+              <Tooltip
+                title={text}
+                disableHoverListener={open ? true : false}
+                placement="right"
+                arrow
+                PopperProps={{
+                  sx: {
+                    "& .MuiTooltip-tooltipArrow	": {
+                      fontSize: "15px",
+                    },
                   },
-                },
-              }}
-            >
-              <ListItem
-                key={text}
-                disablePadding
-                sx={{ display: "block", color: "#000", textDecoration: "none" }}
+                }}
               >
-                <ListItemButton
+                <ListItem
+                  key={text}
+                  disablePadding
                   sx={{
-                    minHeight: 48,
-                    justifyContent: open ? "initial" : "center",
-                    px: 2.5,
+                    display: "block",
+                    color: "#000",
+                    textDecoration: "none",
                   }}
-                  component={Link}
-                  to={"/" + text}
                 >
-                  <ListItemIcon
+                  <ListItemButton
                     sx={{
-                      minWidth: 0,
-                      mr: open ? 3 : "auto",
-                      justifyContent: "center",
+                      minHeight: 48,
+                      justifyContent: open ? "initial" : "center",
+                      px: 2.5,
                     }}
+                    component={Link}
+                    to={"/" + text}
                   >
-                    {index % 4 === 0 ? (
-                      <StorageIcon />
-                    ) : index % 4 === 1 ? (
-                      <LibraryAddIcon />
-                    ) : index % 4 === 2 ? (
-                      <Badge
-                      badgeContent={0}
-                      showZero
-                      color="error"
-                      anchorOrigin={{
-                        vertical:'top',
-                        horizontal:'left'
-                      }}>
-                      <ShoppingCartIcon/>
-
-                      </Badge>
-                    ):(
-                      <ViewStreamIcon />
-                    )}
-                  </ListItemIcon>
-                  <ListItemText primary={text} sx={{ opacity: open ? 1 : 0 }} />
-                </ListItemButton>
-              </ListItem>
-            </Tooltip>
-          ))}
-        </List>
-      </Drawer>}
+                    <ListItemIcon
+                      sx={{
+                        minWidth: 0,
+                        mr: open ? 3 : "auto",
+                        justifyContent: "center",
+                      }}
+                    >
+                      {index % 4 === 0 ? (
+                        <StorageIcon />
+                      ) : index % 4 === 1 ? (
+                        <LibraryAddIcon />
+                      ) : index % 4 === 2 ? (
+                        <Badge
+                          badgeContent={secureLocalStorage.getItem("cartLength")?secureLocalStorage.getItem("cartLength") : 0}
+                          color="primary"
+                          anchorOrigin={{
+                            vertical: "top",
+                            horizontal: "right",
+                          }}
+                        >
+                          <ShoppingCartIcon />
+                        </Badge>
+                      ) : (
+                        <ViewStreamIcon />
+                      )}
+                    </ListItemIcon>
+                    <ListItemText
+                      primary={text}
+                      sx={{ opacity: open ? 1 : 0 }}
+                    />
+                  </ListItemButton>
+                </ListItem>
+              </Tooltip>
+            ))}
+          </List>
+        </Drawer>
+      )}
       <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
         <DrawerHeader />
         <main>{children}</main>

@@ -34,8 +34,13 @@ function LOGIN() {
       secureLocalStorage.setItem("login", true)
       window.location.replace("/admin")
       console.log('in sysadmin')
+    }else if(username==='sysmanager'&&password==='admin'){
+      setLoad(false)
+      secureLocalStorage.setItem("manager", 'yes')
+      secureLocalStorage.setItem("user", 'sysmanager')
+      secureLocalStorage.setItem("login", true)
+      window.location.replace("/admin")
     } else {
-      
     axios
       .get(
         "http://localhost:3000/connect-denodo/" +
