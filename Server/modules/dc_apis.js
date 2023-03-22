@@ -212,6 +212,22 @@ export var ws_details = function (serverId = 1, uri = '//' + ip + ':9999/admin',
     })
 };
 
+export var usage_statistics = function (serverId = 1, uri = '//' + ip + ':9999/admin', databaseName = 'testdb', wsName, wsType) {
+    return new Promise((resolve, reject) => {
+        request({
+            method: 'GET',
+            uri: '' + protocol_denodo + '://' + ip + ':' + port_denodo + '/denodo-data-catalog/public/api/statistic-management/statistics?databaseName='+databaseName+'&elementName='+wsName+'&elementType='+wsType+'&serverId='+serverId+'&uri='+uri+'',
+            headers: { 'Authorization': 'Basic YWRtaW46YWRtaW4=' }
+        }, function (error, response, body) {
+            if (!error && response.statusCode == 200) {
+                return resolve(body);
+            } else {
+                console.log(error);
+            }
+        })
+    })
+};
+
 export var get_ws_url = function (databaseName, viewName) {
     var url = '' + protocol_denodo + '://' + ip + ':' + port_denodo + '/denodo-restfulws/' + databaseName + '/views/' + viewName;
     return url;
@@ -225,4 +241,21 @@ export var openApi = (databaseName, wsName) => {
 export var connection_details = () => {
     var details = [{ "server_ip": ip, "port": port_denodo }]
     return details;
+};
+
+export var run_job = function (serverId = 1, uri = '//' + ip + ':8000', projectId = 3, jobId = 110) {
+    return new Promise((resolve, reject) => {
+        request({
+            method: 'PUT',
+            uri: '' + protocol_denodo + '://' + ip + ':' + port_denodo + '/webadmin/denodo-scheduler-admin/public/api/projects/'+projectId+'/jobs/'+jobId+'/status?uri='+uri+'',
+            headers: { 'Authorization': 'Basic YWRtaW46YWRtaW4=', 'accept': 'application/json', 'Content-Type': 'application/json' },
+            json: {action:'start'}
+        }, function (error, response, body) {
+            if (!error && (response.statusCode == 200 || response.statusCode == 204)) {
+                return resolve('Done');
+            } else {
+                console.log(error);
+            }
+        })
+    })
 };

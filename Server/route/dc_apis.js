@@ -2,7 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import bp from 'body-parser';
 import http from 'http';
-import { categories, connection_details, get_ws_url, openApi, sample_data_link_ws, sync_vdp_datacatalog, tags, views, view_columns, view_details, ws_details, ws_of_category, ws_of_tag } from '../modules/dc_apis.js';
+import { categories, connection_details, get_ws_url, openApi, run_job, sample_data_link_ws, sync_vdp_datacatalog, tags, usage_statistics, views, view_columns, view_details, ws_details, ws_of_category, ws_of_tag } from '../modules/dc_apis.js';
 
 export const app_dc = express();
 app_dc.use(cors());
@@ -138,6 +138,24 @@ app_dc.get('/ws-viewName/:databaseName/:wsName', (req, res) => {
     const view_detail = ws_details(1, '//'+ip+':9999/admin', String(req.params.databaseName), String(req.params.wsName)).then(function (results) {
         //console.log(results);
         res.send(Object.keys(JSON.parse(results).schema)[0]);
+    }
+    );
+});
+
+app_dc.get('/run-job/:project_id/:job_id', (req, res) => {
+    const job = run_job(1, '//'+ip+':8000', parseInt(req.params.project_id), parseInt(req.params.job_id)).then(function (results) {
+        //console.log(results);
+        //console.log(Object.getOwnPropertyNames(JSON.parse(results)));
+        res.send(results);
+    }
+    );
+});
+
+app_dc.get('/usage-statistics/:databaseName/:wsName/:wsType', (req, res) => {
+    const stat = usage_statistics(1, '//'+ip+':9999/admin', String(req.params.databaseName), String(req.params.wsName), String(req.params.wsType)).then(function (results) {
+        //console.log(results);
+        //console.log(Object.getOwnPropertyNames(JSON.parse(results)));
+        res.send(results);
     }
     );
 });
